@@ -97,12 +97,21 @@
         "composer/ca-bundle": "^1.0",
         "nikic/php-parser": "^2.1",
         "prestashop/decimal": "^1.0.0",
-        "cssjanus/cssjanus": "dev-patch-1"
+        "cssjanus/cssjanus": "dev-patch-1",
+        "prestaShop/ps_bestsellers": "^1",
+        "prestaShop/productscategory": "^1",
+        "remidalmeida/productcomments": "dev-master",
+        "remidalmeida/totloyaltyadvanced": "dev-master",
+        "remidalmeida/c4w_sotracothememanager": "dev-master",
+        "remidalmeida/prestashop-sotraco-theme": "dev-master"
     },
     "repositories": [
         {
             "type": "vcs",
             "url": "https://github.com/prestashop/php-cssjanus"
+        },
+        {   "type": "composer",
+             "url": "https://packages.remid.ovh/"
         }
     ],
     "require-dev": {
