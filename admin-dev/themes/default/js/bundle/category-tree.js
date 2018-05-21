@@ -6,7 +6,7 @@
  * This source file is subject to the Open Software License (OSL 3.0)
  * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
@@ -19,7 +19,7 @@
  *
  * @author    PrestaShop SA <contact@prestashop.com>
  * @copyright 2007-2017 PrestaShop SA
- * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
 
@@ -33,16 +33,16 @@
     if (isMethodCall) {
       switch (settings) {
         case 'unselect':
-          $('div.radio > label > input:radio', this).prop('checked', false);
+          this.find('.radio > label > input:radio').prop('checked', false);
           // TODO: add a callback method feature?
           break;
         case 'unfold':
-          $('ul', this).show();
-          $('li', this).has('ul').addClass('less');
+          this.find('ul').show();
+          this.find('li').has('ul').addClass('less');
           break;
         case 'fold':
-          $('ul ul', this).hide();
-          $('li', this).has('ul').addClass('more');
+          this.find('ul ul').hide();
+          this.find('li').has('ul').addClass('more');
           break;
         default:
           throw 'Unknown method';
@@ -50,9 +50,7 @@
     }
     // initialize tree
     else {
-      $('li > ul', this).each(function (i, item) {
         var clickHandler = function (event) {
-
           var $ui = $(event.target);
           if ($ui.attr('type') === 'radio' || $ui.attr('type') === 'checkbox') {
             return;
@@ -72,8 +70,8 @@
           }
 
           return false;
-        };
-
+    };
+      this.find('li > ul').each(function (i, item) {
         var $inputWrapper = $(item).prev('div');
         $inputWrapper.on('click', clickHandler);
         $inputWrapper.find('label').on('click', clickHandler);

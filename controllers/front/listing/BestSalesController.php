@@ -7,7 +7,7 @@
  * This source file is subject to the Open Software License (OSL 3.0)
  * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
@@ -20,7 +20,7 @@
  *
  * @author    PrestaShop SA <contact@prestashop.com>
  * @copyright 2007-2017 PrestaShop SA
- * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchQuery;
@@ -42,10 +42,19 @@ class BestSalesControllerCore extends ProductListingFrontController
     {
         if (Configuration::get('PS_DISPLAY_BEST_SELLERS')) {
             parent::init();
-            $this->doProductSearch('catalog/listing/best-sales');
         } else {
             Tools::redirect('index.php?controller=404');
         }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function initContent()
+    {
+        parent::initContent();
+
+        $this->doProductSearch('catalog/listing/best-sales');
     }
 
     protected function getProductSearchQuery()

@@ -7,7 +7,7 @@
  * This source file is subject to the Open Software License (OSL 3.0)
  * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
@@ -20,11 +20,13 @@
  *
  * @author    PrestaShop SA <contact@prestashop.com>
  * @copyright 2007-2017 PrestaShop SA
- * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
 
 
+use PrestaShop\PrestaShop\Core\Filter\CollectionFilter;
+use PrestaShop\PrestaShop\Core\Filter\HashMapWhitelistFilter;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchQuery;
 use PrestaShop\PrestaShop\Core\Product\Search\Pagination;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchContext;
@@ -430,6 +432,8 @@ abstract class ProductListingFrontControllerCore extends ProductPresentingFrontC
 
                 return $link;
             }, $pagination->buildLinks()),
+            // Compare to 3 because there are the next and previous links
+            'should_be_displayed' => (count($pagination->buildLinks()) > 3)
         );
     }
 
@@ -476,17 +480,34 @@ abstract class ProductListingFrontControllerCore extends ProductPresentingFrontC
         $rendered_products = $this->render('catalog/_partials/products', array('listing' => $search));
         $rendered_products_bottom = $this->render('catalog/_partials/products-bottom', array('listing' => $search));
 
-        $data = array(
-            'rendered_products_top' => $rendered_products_top,
-            'rendered_products' => $rendered_products,
-            'rendered_products_bottom' => $rendered_products_bottom,
+        $data = array_merge(
+            array(
+                'rendered_products_top' => $rendered_products_top,
+                'rendered_products' => $rendered_products,
+                'rendered_products_bottom' => $rendered_products_bottom,
+            ),
+            $search
         );
 
-        foreach ($search as $key => $value) {
-            $data[$key] = $value;
+        if (!empty($data['products']) && is_array($data['products'])) {
+            $data['products'] = $this->prepareProductArrayForAjaxReturn($data['products']);
         }
 
         return $data;
+    }
+
+    /**
+     * Cleans the products array with only whitelisted properties.
+     *
+     * @param array[] $products
+     *
+     * @return array[] Filtered product list
+     */
+    protected function prepareProductArrayForAjaxReturn(array $products)
+    {
+        $filter = $this->get('prestashop.core.filter.front_end_object.search_result_product_collection');
+
+        return $filter->filter($products);
     }
 
     /**
@@ -498,8 +519,6 @@ abstract class ProductListingFrontControllerCore extends ProductPresentingFrontC
      * If we're not doing AJAX, then render the whole page with the given template.
      *
      * @param string $template the template for this page
-     *
-     * @return no return
      */
     protected function doProductSearch($template, $params = array(), $locale = null)
     {

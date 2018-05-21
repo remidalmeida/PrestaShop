@@ -7,7 +7,7 @@
  * This source file is subject to the Open Software License (OSL 3.0)
  * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
@@ -20,14 +20,16 @@
  *
  * @author    PrestaShop SA <contact@prestashop.com>
  * @copyright 2007-2017 PrestaShop SA
- * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
 
 namespace PrestaShopBundle\Install;
 
+use PrestaShop\PrestaShop\Adapter\Entity\Pack;
 use PrestaShop\PrestaShop\Adapter\Entity\Tools;
 use PrestashopInstallerException;
+use PrestaShopDatabaseException;
 use PrestaShop\PrestaShop\Adapter\Entity\Tag;
 use PrestaShop\PrestaShop\Adapter\Entity\Shop;
 use PrestaShop\PrestaShop\Adapter\Entity\Db;
@@ -261,7 +263,8 @@ class XmlLoader
             throw new PrestashopInstallerException('List of fields not found for entity '.$entity);
         }
 
-        if ($this->isMultilang($entity)) {
+        $is_multi_lang_entity = $this->isMultilang($entity);
+        if ($is_multi_lang_entity) {
             $multilang_columns = $this->getColumns($entity, true);
             $xml_langs = array();
             $default_lang = null;
@@ -277,7 +280,6 @@ class XmlLoader
                 }
             }
         }
-
 
         // Load all row for current entity and prepare data to be populated
         foreach ($xml->entities->$entity as $node) {
@@ -298,7 +300,7 @@ class XmlLoader
 
             // Load multilang data
             $data_lang = array();
-            if ($this->isMultilang($entity)) {
+            if ($is_multi_lang_entity) {
                 $xpath_query = $entity.'[@id="'.$identifier.'"]';
                 foreach ($xml_langs as $id_lang => $xml_lang) {
                     if (!$xml_lang) {
@@ -559,6 +561,20 @@ class XmlLoader
         $this->storeId($entity, $identifier, $entity_id);
     }
 
+    /**
+     * @param string $identifier
+     * @param array $data
+     * @param array $data_lang
+     * @return $this
+     * @throws PrestaShopDatabaseException
+     */
+    public function createEntityPack($identifier, array $data, array $data_lang)
+    {
+        Pack::addItem($data['id_product_pack'], $data['id_product_item'], $data['quantity']);
+
+        return $this;
+    }
+
     public function createEntityStockAvailable($identifier, array $data, array $data_lang)
     {
         $stock_available = new StockAvailable();
@@ -647,7 +663,13 @@ class XmlLoader
             $entity_id = $this->retrieveId($entity, $identifier);
 
             if (!@copy($from_path.$identifier.'.'.$extension, $dst_path.$entity_id.'.'.$extension)) {
-                $this->setError($this->translator->trans('Cannot create image "%identifier%" for entity "%entity%"', array('%entity%' =>  $entity, '%identifier%' => $identifier), 'Install'));
+                $this->setError(
+                    $this->translator->trans(
+                        'Cannot create image "%identifier%" for entity "%entity%"',
+                        array('%entity%' => $entity, '%identifier%' => $identifier),
+                        'Install'
+                    )
+                );
                 return;
             }
 
@@ -657,18 +679,40 @@ class XmlLoader
 
                 // Test if dest folder is writable
                 if (!is_writable(dirname($target_file))) {
-                    $this->setError($this->translator->trans('Cannot create image "%identifier%" (bad permissions on folder "%folder%")', array('%identifier%' => $identifier.'-'.$type['name'], '%folder%' => dirname($target_file)), 'Install'));
-                }
-                // If a file named folder/entity-type.extension exists just copy it, this is an optimisation in order to prevent to much resize
-                elseif (file_exists($origin_file)) {
+                    $this->setError(
+                        $this->translator->trans(
+                            'Cannot create image "%identifier%" (bad permissions on folder "%folder%")',
+                            array('%identifier%' => $identifier.'-'.$type['name'], '%folder%' => dirname($target_file)),
+                            'Install'
+                        )
+                    );
+                } elseif (file_exists($origin_file)) {
+                    // If a file named folder/entity-type.extension exists just copy it
+                    // this is an optimisation in order to prevent to much resize
                     if (!@copy($origin_file, $target_file)) {
-                        $this->setError($this->translator->trans('Cannot create image "%identifier%"', array('%identifier%' => $identifier.'-'.$type['name']), 'Install'));
+                        $this->setError(
+                            $this->translator->trans(
+                                'Cannot create image "%identifier%"',
+                                array('%identifier%' => $identifier.'-'.$type['name']),
+                                'Install'
+                            )
+                        );
                     }
                     @chmod($target_file, 0644);
-                }
-                // Resize the image if no cache was prepared in fixtures
-                elseif (!ImageManager::resize($from_path.$identifier.'.'.$extension, $target_file, $type['width'], $type['height'])) {
-                    $this->setError($this->translator->trans('Cannot create image "%identifier%" for entity "%entity%"', array('%identifier%' => $identifier.'-'.$type['name'], '%entity%' => $entity), 'Install'));
+                } elseif (!ImageManager::resize(
+                    $from_path.$identifier.'.'.$extension,
+                    $target_file,
+                    $type['width'],
+                    $type['height']
+                )) {
+                    // Resize the image if no cache was prepared in fixtures
+                    $this->setError(
+                        $this->translator->trans(
+                            'Cannot create image "%identifier%" for entity "%entity%"',
+                            array('%identifier%' => $identifier.'-'.$type['name'], '%entity%' => $entity),
+                            'Install'
+                        )
+                    );
                 }
             }
         }
@@ -699,7 +743,13 @@ class XmlLoader
         $image = new Image($this->retrieveId('image', $identifier));
         $dst_path = $image->getPathForCreation();
         if (!@copy($path.$identifier.'.jpg', $dst_path.'.'.$image->image_format)) {
-            $this->setError($this->translator->trans('Cannot create image "%identifier%" for entity "%entity%"', array('%identifier%' => $identifier, '%entity%' => 'product'), 'Install'));
+            $this->setError(
+                $this->translator->trans(
+                    'Cannot create image "%identifier%" for entity "%entity%"',
+                    array('%identifier%' => $identifier, '%entity%' => 'product'),
+                    'Install'
+                )
+            );
             return;
         }
         @chmod($dst_path.'.'.$image->image_format, 0644);
@@ -711,18 +761,35 @@ class XmlLoader
 
             // Test if dest folder is writable
             if (!is_writable(dirname($target_file))) {
-                $this->setError($this->translator->trans('Cannot create image "%identifier%" (bad permissions on folder "%folder%")', array('%identifier%' => $identifier.'-'.$type['name'], '%folder%' => dirname($target_file)), 'Install'));
-            }
-            // If a file named folder/entity-type.jpg exists just copy it, this is an optimisation in order to prevent to much resize
-            elseif (file_exists($origin_file)) {
+                $this->setError(
+                    $this->translator->trans(
+                        'Cannot create image "%identifier%" (bad permissions on folder "%folder%")',
+                        array('%identifier%' => $identifier.'-'.$type['name'], '%folder%' => dirname($target_file)),
+                        'Install'
+                    )
+                );
+            } elseif (file_exists($origin_file)) {
+                // If a file named folder/entity-type.jpg exists just copy it
+                // this is an optimisation in order to prevent to much resize
                 if (!@copy($origin_file, $target_file)) {
-                    $this->setError($this->translator->trans('Cannot create image "%1$s" for entity "%2$s"', array('%identifier%' => $identifier.'-'.$type['name'], '%entity%' =>  'product'), 'Install'));
+                    $this->setError(
+                        $this->translator->trans(
+                            'Cannot create image "%1$s" for entity "%2$s"',
+                            array('%identifier%' => $identifier.'-'.$type['name'], '%entity%' => 'product'),
+                            'Install'
+                        )
+                    );
                 }
                 @chmod($target_file, 0644);
-            }
-            // Resize the image if no cache was prepared in fixtures
-            elseif (!ImageManager::resize($path.$identifier.'.jpg', $target_file, $type['width'], $type['height'])) {
-                $this->setError($this->translator->trans('Cannot create image "%1$s" for entity "%2$s"', array('%identifier%' => $identifier.'-'.$type['name'], '%entity%' =>  'product'), 'Install'));
+            } elseif (!ImageManager::resize($path.$identifier.'.jpg', $target_file, $type['width'], $type['height'])) {
+                // Resize the image if no cache was prepared in fixtures
+                $this->setError(
+                    $this->translator->trans(
+                        'Cannot create image "%identifier%" for entity "%entity%"',
+                        array('%identifier%' => $identifier.'-'.$type['name'], '%entity%' => 'product'),
+                        'Install'
+                    )
+                );
             }
         }
     }

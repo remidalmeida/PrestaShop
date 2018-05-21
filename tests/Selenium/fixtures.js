@@ -6,7 +6,7 @@
  * This source file is subject to the Open Software License (OSL 3.0)
  * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
@@ -19,24 +19,24 @@
  *
  * @author    PrestaShop SA <contact@prestashop.com>
  * @copyright 2007-2017 PrestaShop SA
- * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
 module.exports = {
-    aProductWithVariants: {
-        id: 5,
-        // Format is: key = id of attribute group, value = id of attribute value
-        defaultVariant: {
-            '1': 1,
-            '3': 16
-        },
-        anotherVariant: {
-            '1': 3,
-            '3': 14
-        }
+  aProductWithVariants: {
+    id: 1,
+    // Format is: key = id of attribute group, value = id of attribute value
+    defaultVariant: {
+      '1': 1,
+      '2': 8
     },
-    aCustomizableProduct: {
-      id: 1
+    anotherVariant: {
+      '1': 2,
+      '2': 11
+    }
+  },
+  aCustomizableProduct: {
+    id: 1
     },
     order: {
       id: 5,
@@ -50,7 +50,7 @@ module.exports = {
       checkout: '/en/order',
       orderhistory: '/en/order-history',
       orderdetail: '/en/index.php?controller=order-detail&id_order=5',
-      aCategoryWithProducts: '/en/3-women',
+      aCategoryWithProducts: '/en/3-clothes',
       identity: '/en/identity',
       adminLogin: '/admin-dev',
       guestTracking: '/en/guest-tracking',

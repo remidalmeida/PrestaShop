@@ -1,16 +1,24 @@
 .products-catalog {
 
   > .content {
-    background: $white;
+    background: #ffffff;
     padding: {
       top: $grid-gutter-width / 2;
       bottom: $grid-gutter-width / 2;
     }
     margin-bottom: 20px;
+
+    .row {
+      align-items: center;
+    }
   }
 
   > .content:last-child {
     margin-bottom: 0;
+  }
+
+  #catalog-actions {
+    align-items: start;
   }
 
   .icon-caret {
@@ -41,6 +49,15 @@
     }
   }
 
+  #product_catalog_category_tree_filter {
+    margin-left: auto;
+  }
+
+  .bulk-catalog {
+    .dropdown-item {
+      border: 0;
+    }
+  }
 }
 
 .emptycatalog-icon {

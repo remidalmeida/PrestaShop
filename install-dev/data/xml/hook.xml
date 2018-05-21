@@ -41,6 +41,26 @@
       <title>Right column blocks</title>
       <description>This hook displays new elements in the right-hand column</description>
     </hook>
+    <hook id="displayWrapperTop">
+      <name>displayWrapperTop</name>
+      <title>Main wrapper section (top)</title>
+      <description>This hook displays new elements in the top of the main wrapper</description>
+    </hook>
+    <hook id="displayWrapperBottom">
+      <name>displayWrapperBottom</name>
+      <title>Main wrapper section (bottom)</title>
+      <description>This hook displays new elements in the bottom of the main wrapper</description>
+    </hook>
+    <hook id="displayContentWrapperTop">
+      <name>displayContentWrapperTop</name>
+      <title>Content wrapper section (top)</title>
+      <description>This hook displays new elements in the top of the content wrapper</description>
+    </hook>
+    <hook id="displayContentWrapperBottom">
+      <name>displayContentWrapperBottom</name>
+      <title>Content wrapper section (bottom)</title>
+      <description>This hook displays new elements in the bottom of the content wrapper</description>
+    </hook>
     <hook id="displayLeftColumn">
       <name>displayLeftColumn</name>
       <title>Left column blocks</title>
@@ -175,6 +195,11 @@
       <name>displayAdminCustomers</name>
       <title>Display new elements in the Back Office, tab AdminCustomers</title>
       <description>This hook launches modules when the AdminCustomers tab is displayed in the Back Office</description>
+    </hook>
+    <hook id="displayAdminCustomersAddressesItemAction">
+      <name>displayAdminCustomersAddressesItemAction</name>
+      <title>Display new elements in the Back Office, tab AdminCustomers, Addresses actions</title>
+      <description>This hook launches modules when the Addresses list into the AdminCustomers tab is displayed in the Back Office</description>
     </hook>
     <hook id="displayOrderConfirmation">
       <name>displayOrderConfirmation</name>
@@ -670,6 +695,76 @@
       <name>actionEmailSendBefore</name>
       <title>Before sending an email</title>
       <description>This hook is used to filter the content or the metadata of an email before sending it or even prevent its sending</description>
+    </hook>
+    <hook id="displayAdminProductsMainStepLeftColumnMiddle">
+      <name>displayAdminProductsMainStepLeftColumnMiddle</name>
+      <title>Display new elements in back office product page, left column of the Basic settings tab</title>
+      <description>This hook launches modules when the back office product page is displayed</description>
+    </hook>
+    <hook id="displayAdminProductsMainStepLeftColumnBottom">
+      <name>displayAdminProductsMainStepLeftColumnBottom</name>
+      <title>Display new elements in back office product page, left column of the Basic settings tab</title>
+      <description>This hook launches modules when the back office product page is displayed</description>
+    </hook>
+    <hook id="displayAdminProductsMainStepRightColumnBottom">
+      <name>displayAdminProductsMainStepRightColumnBottom</name>
+      <title>Display new elements in back office product page, right column of the Basic settings tab</title>
+      <description>This hook launches modules when the back office product page is displayed</description>
+    </hook>
+    <hook id="displayAdminProductsQuantitiesStepBottom">
+      <name>displayAdminProductsQuantitiesStepBottom</name>
+      <title>Display new elements in back office product page, Quantities/Combinations tab</title>
+      <description>This hook launches modules when the back office product page is displayed</description>
+    </hook>
+    <hook id="displayAdminProductsPriceStepBottom">
+      <name>displayAdminProductsPriceStepBottom</name>
+      <title>Display new elements in back office product page, Price tab</title>
+      <description>This hook launches modules when the back office product page is displayed</description>
+    </hook>
+    <hook id="displayAdminProductsOptionsStepTop">
+      <name>displayAdminProductsOptionsStepTop</name>
+      <title>Display new elements in back office product page, Options tab</title>
+      <description>This hook launches modules when the back office product page is displayed</description>
+    </hook>
+    <hook id="displayAdminProductsOptionsStepBottom">
+      <name>displayAdminProductsOptionsStepBottom</name>
+      <title>Display new elements in back office product page, Options tab</title>
+      <description>This hook launches modules when the back office product page is displayed</description>
+    </hook>
+    <hook id="displayAdminProductsSeoStepBottom">
+      <name>displayAdminProductsSeoStepBottom</name>
+      <title>Display new elements in back office product page, SEO tab</title>
+      <description>This hook launches modules when the back office product page is displayed</description>
+    </hook>
+    <hook id="displayAdminProductsShippingStepBottom">
+      <name>displayAdminProductsShippingStepBottom</name>
+      <title>Display new elements in back office product page, Shipping tab</title>
+      <description>This hook launches modules when the back office product page is displayed</description>
+    </hook>
+    <hook id="displayAdminProductsCombinationBottom">
+      <name>displayAdminProductsCombinationBottom</name>
+      <title>Display new elements in back office product page, Combination tab</title>
+      <description>This hook launches modules when the back office product page is displayed</description>
+    </hook>
+    <hook id="displayDashboardToolbarTopMenu">
+      <name>displayDashboardToolbarTopMenu</name>
+      <title>Display new elements in back office page with a dashboard, on top Menu</title>
+      <description>This hook launches modules when a page with a dashboard is displayed</description>
+    </hook>
+    <hook id="displayDashboardToolbarIcons">
+      <name>displayDashboardToolbarIcons</name>
+      <title>Display new elements in back office page with dashboard, on icons list</title>
+      <description>This hook launches modules when the back office with dashboard is displayed</description>
+    </hook>
+    <hook id="actionBuildFrontEndObject">
+      <name>actionBuildFrontEndObject</name>
+      <title>Manage elements added to the "prestashop" javascript object</title>
+      <description>This hook allows you to customize the "prestashop" javascript object that is included in all front office pages</description>
+    </hook>
+    <hook id="actionFrontControllerAfterInit">
+      <name>actionFrontControllerAfterInit</name>
+      <title>Perform actions after front office controller initialization</title>
+      <description>This hook is launched after the initialization of all front office controllers</description>
     </hook>
   </entities>
 </entity_hook>

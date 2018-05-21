@@ -7,7 +7,7 @@
  * This source file is subject to the Open Software License (OSL 3.0)
  * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
@@ -20,7 +20,7 @@
  *
  * @author    PrestaShop SA <contact@prestashop.com>
  * @copyright 2007-2017 PrestaShop SA
- * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
 
@@ -35,6 +35,7 @@ use PrestaShop\PrestaShop\Core\Product\Search\SortOrderFactory;
 use PrestaShop\PrestaShop\Core\Product\Search\SortOrder;
 use Symfony\Component\Translation\TranslatorInterface;
 use ProductSale;
+use Tools;
 
 class BestSalesProductSearchProvider implements ProductSearchProviderInterface
 {
@@ -52,6 +53,14 @@ class BestSalesProductSearchProvider implements ProductSearchProviderInterface
         ProductSearchContext $context,
         ProductSearchQuery $query
     ) {
+        $sortBySales = (new SortOrder('product', 'sales', 'desc'))->setLabel(
+            $this->translator->trans('Sales, highest to lowest', array(), 'Shop.Theme.Catalog')
+        );
+
+        if (!Tools::getValue('order', 0)) {
+            $query->setSortOrder($sortBySales);
+        }
+
         if (!$products = ProductSale::getBestSales(
             $context->getIdLang(),
             $query->getPage(),
@@ -73,6 +82,7 @@ class BestSalesProductSearchProvider implements ProductSearchProviderInterface
 
             $result->setAvailableSortOrders(
                 array(
+                    $sortBySales,
                     (new SortOrder('product', 'name', 'asc'))->setLabel(
                         $this->translator->trans('Name, A to Z', array(), 'Shop.Theme.Catalog')
                     ),

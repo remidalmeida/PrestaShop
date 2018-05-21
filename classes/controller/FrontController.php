@@ -7,7 +7,7 @@
  * This source file is subject to the Open Software License (OSL 3.0)
  * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
@@ -20,7 +20,7 @@
  *
  * @author    PrestaShop SA <contact@prestashop.com>
  * @copyright 2007-2017 PrestaShop SA
- * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
 use PrestaShop\PrestaShop\Adapter\Cart\CartPresenter;
@@ -187,8 +187,6 @@ class FrontControllerCore extends Controller
             $this->ssl = true;
         }
 
-        $this->guestAllowed = Configuration::get('PS_GUEST_CHECKOUT_ENABLED');
-
         if (isset($useSSL)) {
             $this->ssl = $useSSL;
         } else {
@@ -313,7 +311,7 @@ class FrontControllerCore extends Controller
             $this->context->cookie->id_cart = (int) $id_cart;
         }
 
-        if ($this->auth && !$this->context->customer->isLogged()) {
+        if ($this->auth && !$this->context->customer->isLogged($this->guestAllowed)) {
             Tools::redirect('index.php?controller=authentication'.($this->authRedirection ? '&back='.$this->authRedirection : ''));
         }
 
@@ -482,6 +480,8 @@ class FrontControllerCore extends Controller
         $this->iso = $iso;
         $this->context->cart = $cart;
         $this->context->currency = $currency;
+
+        Hook::exec('actionFrontControllerAfterInit');
     }
 
     /**
@@ -514,7 +514,31 @@ class FrontControllerCore extends Controller
         );
 
         $this->context->smarty->assign($templateVars);
-        Media::addJsDef(array('prestashop' => $templateVars));
+
+        Media::addJsDef(array (
+            'prestashop' => $this->buildFrontEndObject($templateVars)
+        ));
+    }
+
+    /**
+     * Builds the "prestashop" javascript object that will be sent to the front end
+     *
+     * @param array $object Variables inserted in the template (see FrontController::assignGeneralPurposeVariables)
+     *
+     * @return array Variables to be inserted in the "prestashop" javascript object
+     * @throws \PrestaShop\PrestaShop\Core\Filter\FilterException
+     * @throws PrestaShopException
+     */
+    protected function buildFrontEndObject($object)
+    {
+        $object = $this->get('prestashop.core.filter.front_end_object.main')
+            ->filter($object);
+
+        Hook::exec('actionBuildFrontEndObject', array(
+            'obj' => &$object
+        ));
+
+        return $object;
     }
 
     /**
@@ -660,7 +684,7 @@ class FrontControllerCore extends Controller
             $html = $this->context->smarty->fetch($content, null, $this->getLayout());
         }
 
-        Hook::exec('actionOutputHTMLBefore',  array('html' => &$html));
+        Hook::exec('actionOutputHTMLBefore', array('html' => &$html));
         echo trim($html);
     }
 
@@ -701,6 +725,7 @@ class FrontControllerCore extends Controller
 
                 $this->registerStylesheet('theme-error', '/assets/css/error.css', ['media' => 'all', 'priority' => 50]);
                 $this->context->smarty->assign(array(
+                    'urls' => $this->getTemplateVarUrls(),
                     'shop' => $this->getTemplateVarShop(),
                     'HOOK_MAINTENANCE' => Hook::exec('displayMaintenance', array()),
                     'maintenance_text' => Configuration::get('PS_MAINTENANCE_TEXT', (int) $this->context->language->id),
@@ -722,6 +747,7 @@ class FrontControllerCore extends Controller
 
         $this->registerStylesheet('theme-error', '/assets/css/error.css', ['media' => 'all', 'priority' => 50]);
         $this->context->smarty->assign(array(
+            'urls' => $this->getTemplateVarUrls(),
             'shop' => $this->getTemplateVarShop(),
             'stylesheets' => $this->getStylesheets(),
         ));
@@ -854,7 +880,7 @@ class FrontControllerCore extends Controller
                     $this->restrictedCountry = Country::GEOLOC_FORBIDDEN;
                 } elseif (Configuration::get('PS_GEOLOCATION_NA_BEHAVIOR') == _PS_GEOLOCATION_NO_ORDER_ && !FrontController::isInWhitelistForGeolocation()) {
                     $this->restrictedCountry = Country::GEOLOC_CATALOG_MODE;
-                    $countryName = $this->trans('Undefined', array(), 'Shop.Theme');
+                    $countryName = $this->trans('Undefined', array(), 'Shop.Theme.Global');
                     if (isset($record->country->name) && $record->country->name) {
                         $countryName = $record->country->name;
                     }
@@ -1308,8 +1334,13 @@ class FrontControllerCore extends Controller
     public function getLayout()
     {
         $entity = $this->php_self;
+        if (empty($entity)) {
+            $entity = $this->getPageName();
+        }
 
         $layout = $this->context->shop->theme->getLayoutRelativePathForPage($entity);
+
+        $content_only = (int) Tools::getValue('content_only');
 
         if ($overridden_layout = Hook::exec(
             'overrideLayoutTemplate',
@@ -1318,12 +1349,13 @@ class FrontControllerCore extends Controller
                 'entity' => $entity,
                 'locale' => $this->context->language->locale,
                 'controller' => $this,
+                'content_only' => $content_only,
             )
         )) {
             return $overridden_layout;
         }
 
-        if ((int) Tools::getValue('content_only')) {
+        if ($content_only) {
             $layout = 'layouts/layout-content-only.tpl';
         }
 
@@ -1654,7 +1686,7 @@ class FrontControllerCore extends Controller
         $breadcrumb = array();
 
         $breadcrumb['links'][] = array(
-            'title' => $this->getTranslator()->trans('Home', array(), 'Shop.Theme'),
+            'title' => $this->getTranslator()->trans('Home', array(), 'Shop.Theme.Global'),
             'url' => $this->context->link->getPageLink('index', true),
         );
 
@@ -1722,7 +1754,7 @@ class FrontControllerCore extends Controller
             $params = array();
         }
 
-        $queryString = str_replace('%2F', '/', http_build_query($params));
+        $queryString = str_replace('%2F', '/', http_build_query($params, '', '&'));
 
         return $url.($queryString ? "?$queryString" : '');
     }
@@ -1832,6 +1864,7 @@ class FrontControllerCore extends Controller
 
     protected function makeCustomerForm()
     {
+        $guestAllowedCheckout = Configuration::get('PS_GUEST_CHECKOUT_ENABLED');
         $form = new CustomerForm(
             $this->context->smarty,
             $this->context,
@@ -1841,12 +1874,12 @@ class FrontControllerCore extends Controller
                 $this->context,
                 $this->get('hashing'),
                 $this->getTranslator(),
-                $this->guestAllowed
+                $guestAllowedCheckout
             ),
             $this->getTemplateVarUrls()
         );
 
-        $form->setGuestAllowed($this->guestAllowed);
+        $form->setGuestAllowed($guestAllowedCheckout);
 
         $form->setAction($this->getCurrentURL());
 

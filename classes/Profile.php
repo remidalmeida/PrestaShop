@@ -7,7 +7,7 @@
  * This source file is subject to the Open Software License (OSL 3.0)
  * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
@@ -20,7 +20,7 @@
  *
  * @author    PrestaShop SA <contact@prestashop.com>
  * @copyright 2007-2017 PrestaShop SA
- * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
 
@@ -153,7 +153,7 @@ class ProfileCore extends ObjectModel
                     $idProfile,
                     $type,
                     array(
-                        'id_profile' => _PS_ADMIN_PROFILE_,
+                        'id_profile' => $idProfile,
                         'view' => '0',
                         'add' => '0',
                         'edit' => '0',
@@ -172,9 +172,9 @@ class ProfileCore extends ObjectModel
 				WHERE j.`id_profile` = '.(int) $idProfile);
 
                 foreach ($result as $row) {
-                    $idTab = self::findIdTabByAuthSlug($row['slug']);
+                    $tab = self::findTabTypeInformationByAuthSlug($type, $row['slug']);
 
-                    self::$_cache_accesses[$idProfile][$type][$idTab][array_search('1', $row)] = '1';
+                    self::$_cache_accesses[$idProfile][$type][$tab][array_search('1', $row)] = '1';
                 }
             }
         }
@@ -182,7 +182,8 @@ class ProfileCore extends ObjectModel
         return self::$_cache_accesses[$idProfile][$type];
     }
 
-    public static function resetCacheAccesses() {
+    public static function resetCacheAccesses()
+    {
         self::$_cache_accesses = array();
     }
 
@@ -206,11 +207,13 @@ class ProfileCore extends ObjectModel
     }
 
     /**
-     *
+     * Find tab type information by authorization slug
+     * 
+     * @param string $type
      * @param string $authSlug
      * @return int
      */
-    private static function findIdTabByAuthSlug($authSlug)
+    private static function findTabTypeInformationByAuthSlug($type, $authSlug)
     {
         preg_match(
             '/ROLE_MOD_[A-Z]+_(?P<classname>[A-Z]+)_(?P<auth>[A-Z]+)/',
@@ -219,11 +222,11 @@ class ProfileCore extends ObjectModel
         );
 
         $result = Db::getInstance()->getRow('
-            SELECT `id_tab`
+            SELECT `'.$type.'`
             FROM `'._DB_PREFIX_.'tab` t
             WHERE UCASE(`class_name`) = "'.$matches['classname'].'"
         ');
 
-        return $result['id_tab'];
+        return $result[$type];
     }
 }

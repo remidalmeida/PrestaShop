@@ -7,7 +7,7 @@
  * This source file is subject to the Open Software License (OSL 3.0)
  * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
@@ -20,7 +20,7 @@
  *
  * @author    PrestaShop SA <contact@prestashop.com>
  * @copyright 2007-2017 PrestaShop SA
- * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
 
@@ -206,6 +206,17 @@ class CartCore extends ObjectModel
         $this->addressFactory = ServiceLocator::get('\\PrestaShop\\PrestaShop\\Adapter\\AddressFactory');
     }
 
+    public static function resetStaticCache()
+    {
+        static::$_nbProducts      = array();
+        static::$_isVirtualCart   = array();
+        static::$_totalWeight     = array();
+        static::$_carriers        = null;
+        static::$_taxes_rate      = null;
+        static::$_attributesLists = array();
+        static::$_customer        = null;
+    }
+
     /**
      * Set Tax calculation method
      */
@@ -338,7 +349,7 @@ class CartCore extends ObjectModel
         );
 
         if (!Db::getInstance()->execute('DELETE FROM `'._DB_PREFIX_.'cart_cart_rule` WHERE `id_cart` = '.(int)$this->id)
-         || !Db::getInstance()->execute('DELETE FROM `'._DB_PREFIX_.'cart_product` WHERE `id_cart` = '.(int)$this->id)) {
+            || !Db::getInstance()->execute('DELETE FROM `'._DB_PREFIX_.'cart_product` WHERE `id_cart` = '.(int)$this->id)) {
             return false;
         }
 
@@ -387,9 +398,9 @@ class CartCore extends ObjectModel
 
             $total_products_average += $product['total_wt'];
             $ratio_tax += $product['total_wt'] * Tax::getProductTaxRate(
-                (int)$product['id_product'],
-                (int)$address_id
-            );
+                    (int)$product['id_product'],
+                    (int)$address_id
+                );
         }
 
         if ($total_products_average > 0) {
@@ -569,10 +580,10 @@ class CartCore extends ObjectModel
         if ($result && isset($result['id_product']) && $result['id_product']) {
             foreach ($this->getProducts() as $product) {
                 if ($result['id_product'] == $product['id_product']
-                && (
-                    !$result['id_product_attribute']
-                    || $result['id_product_attribute'] == $product['id_product_attribute']
-                )) {
+                    && (
+                        !$result['id_product_attribute']
+                        || $result['id_product_attribute'] == $product['id_product_attribute']
+                    )) {
                     return $product;
                 }
             }
@@ -584,9 +595,14 @@ class CartCore extends ObjectModel
     /**
      * Return cart products
      *
-     * @result array Products
+     * @param bool $refresh
+     * @param bool $id_product
+     * @param int  $id_country
+     * @param bool $fullInfos
+     *
+     * @return array Products
      */
-    public function getProducts($refresh = false, $id_product = false, $id_country = null)
+    public function getProducts($refresh = false, $id_product = false, $id_country = null, $fullInfos = true)
     {
         if (!$this->id) {
             return array();
@@ -612,9 +628,9 @@ class CartCore extends ObjectModel
         $sql->select('cp.`id_product_attribute`, cp.`id_product`, cp.`quantity` AS cart_quantity, cp.id_shop, cp.`id_customization`, pl.`name`, p.`is_virtual`,
                         pl.`description_short`, pl.`available_now`, pl.`available_later`, product_shop.`id_category_default`, p.`id_supplier`,
                         p.`id_manufacturer`, m.`name` AS manufacturer_name, product_shop.`on_sale`, product_shop.`ecotax`, product_shop.`additional_shipping_cost`,
-                        product_shop.`available_for_order`, product_shop.`price`, product_shop.`active`, product_shop.`unity`, product_shop.`unit_price_ratio`,
+                        product_shop.`available_for_order`, product_shop.`show_price`, product_shop.`price`, product_shop.`active`, product_shop.`unity`, product_shop.`unit_price_ratio`,
                         stock.`quantity` AS quantity_available, p.`width`, p.`height`, p.`depth`, stock.`out_of_stock`, p.`weight`,
-                        p.`date_add`, p.`date_upd`, IFNULL(stock.quantity, 0) as quantity, pl.`link_rewrite`, cl.`link_rewrite` AS category,
+                        p.`available_date`, p.`date_add`, p.`date_upd`, IFNULL(stock.quantity, 0) as quantity, pl.`link_rewrite`, cl.`link_rewrite` AS category,
                         CONCAT(LPAD(cp.`id_product`, 10, 0), LPAD(IFNULL(cp.`id_product_attribute`, 0), 10, 0), IFNULL(cp.`id_address_delivery`, 0), IFNULL(cp.`id_customization`, 0)) AS unique_id, cp.id_address_delivery,
                         product_shop.advanced_stock_management, ps.product_supplier_reference supplier_reference');
 
@@ -719,63 +735,73 @@ class CartCore extends ObjectModel
             return array();
         }
 
-        $ecotax_rate = (float)Tax::getProductEcotaxRate($this->{Configuration::get('PS_TAX_ADDRESS_TYPE')});
-        $apply_eco_tax = Product::$_taxCalculationMethod == PS_TAX_INC && (int)Configuration::get('PS_TAX');
-        $cart_shop_context = Context::getContext()->cloneContext();
+        if ($fullInfos) {
+            $ecotax_rate = (float)Tax::getProductEcotaxRate($this->{Configuration::get('PS_TAX_ADDRESS_TYPE')});
+            $apply_eco_tax = Product::$_taxCalculationMethod == PS_TAX_INC && (int)Configuration::get('PS_TAX');
+            $cart_shop_context = Context::getContext()->cloneContext();
 
-        $gifts = $this->getCartRules(CartRule::FILTER_ACTION_GIFT);
-        $givenAwayProductsIds = array();
+            $gifts = $this->getCartRules(CartRule::FILTER_ACTION_GIFT);
+            $givenAwayProductsIds = array();
 
-        if ($this->shouldSplitGiftProductsQuantity && count($gifts) > 0) {
-            foreach ($gifts as $gift) {
-                foreach ($result as $rowIndex => $row) {
-                    if (!array_key_exists('is_gift', $result[$rowIndex])) {
-                        $result[$rowIndex]['is_gift'] = false;
+            if ($this->shouldSplitGiftProductsQuantity && count($gifts) > 0) {
+                foreach ($gifts as $gift) {
+                    foreach ($result as $rowIndex => $row) {
+                        if (!array_key_exists('is_gift', $result[$rowIndex])) {
+                            $result[$rowIndex]['is_gift'] = false;
+                        }
+
+                        if (
+                            $row['id_product'] == $gift['gift_product'] &&
+                            $row['id_product_attribute'] == $gift['gift_product_attribute']
+                        ) {
+                            $row['is_gift'] = true;
+                            $result[$rowIndex] = $row;
+                        }
                     }
 
-                    if (
-                        $row['id_product'] == $gift['gift_product'] &&
-                        $row['id_product_attribute'] == $gift['gift_product_attribute']
-                    ) {
-                        $row['is_gift'] = true;
-                        $result[$rowIndex] = $row;
+                    $index = $gift['gift_product'] . '-' . $gift['gift_product_attribute'];
+                    if (!array_key_exists($index, $givenAwayProductsIds)) {
+                        $givenAwayProductsIds[$index] = 1;
+                    } else {
+                        $givenAwayProductsIds[$index]++;
                     }
                 }
+            }
 
-                $index = $gift['gift_product'].'-'.$gift['gift_product_attribute'];
-                if (!array_key_exists($index, $givenAwayProductsIds)) {
-                    $givenAwayProductsIds[$index] = 1;
+            foreach ($result as &$row) {
+                if (!array_key_exists('is_gift', $row)) {
+                    $row['is_gift'] = false;
+                }
+
+                $additionalRow = Product::getProductProperties((int)$this->id_lang, $row);
+                $row['reduction'] = $additionalRow['reduction'];
+                $row['price_without_reduction'] = $additionalRow['price_without_reduction'];
+                $row['specific_prices'] = $additionalRow['specific_prices'];
+                unset($additionalRow);
+
+                $givenAwayQuantity = 0;
+                $giftIndex = $row['id_product'] . '-' . $row['id_product_attribute'];
+                if ($row['is_gift'] && array_key_exists($giftIndex, $givenAwayProductsIds)) {
+                    $givenAwayQuantity = $givenAwayProductsIds[$giftIndex];
+                }
+
+                if (!$row['is_gift'] || (int)$row['cart_quantity'] === $givenAwayQuantity) {
+                    $row = $this->applyProductCalculations($row, $cart_shop_context);
                 } else {
-                    $givenAwayProductsIds[$index]++;
+                    // Separate products given away from those manually added to cart
+                    $this->_products[] = $this->applyProductCalculations($row, $cart_shop_context, $givenAwayQuantity);
+                    unset($row['is_gift']);
+                    $row = $this->applyProductCalculations(
+                        $row,
+                        $cart_shop_context,
+                        $row['cart_quantity'] - $givenAwayQuantity
+                    );
                 }
-            }
-        }
 
-        foreach ($result as &$row) {
-            if (!array_key_exists('is_gift', $row)) {
-                $row['is_gift'] = false;
+                $this->_products[] = $row;
             }
-
-            $givenAwayQuantity = 0;
-            $giftIndex = $row['id_product'].'-'.$row['id_product_attribute'];
-            if ($row['is_gift'] && array_key_exists($giftIndex, $givenAwayProductsIds)) {
-                $givenAwayQuantity = $givenAwayProductsIds[$giftIndex];
-            }
-
-            if (!$row['is_gift'] || (int) $row['cart_quantity'] === $givenAwayQuantity) {
-                $row = $this->applyProductCalculations($row, $cart_shop_context);
-            } else {
-                // Separate products given away from those manually added to cart
-                $this->_products[] = $this->applyProductCalculations($row, $cart_shop_context, $givenAwayQuantity);
-                unset($row['is_gift']);
-                $row = $this->applyProductCalculations(
-                    $row,
-                    $cart_shop_context,
-                    $row['cart_quantity'] - $givenAwayQuantity
-                );
-            }
-
-            $this->_products[] = $row;
+        } else {
+            $this->_products = $result;
         }
 
         return $this->_products;
@@ -912,13 +938,13 @@ class CartCore extends ObjectModel
             case Order::ROUND_ITEM:
             default:
                 $row['total'] = Tools::ps_round(
-                    $row['price_with_reduction_without_tax'],
-                    _PS_PRICE_COMPUTE_PRECISION_
-                ) * $productQuantity;
+                        $row['price_with_reduction_without_tax'],
+                        _PS_PRICE_COMPUTE_PRECISION_
+                    ) * $productQuantity;
                 $row['total_wt'] = Tools::ps_round(
-                    $row['price_with_reduction'],
-                    _PS_PRICE_COMPUTE_PRECISION_
-                ) * $productQuantity;
+                        $row['price_with_reduction'],
+                        _PS_PRICE_COMPUTE_PRECISION_
+                    ) * $productQuantity;
                 break;
         }
 
@@ -1110,40 +1136,90 @@ class CartCore extends ObjectModel
     /**
      * Check if the Cart contains the given Product (Attribute)
      *
+     * @param int $idProduct Product ID
+     * @param int $idProductAttribute ProductAttribute ID
+     * @param int $idCustomization Customization ID
+     * @param int $idAddressDelivery Delivery Address ID
+     *
+     * @return array quantity index     : number of product in cart without counting those of pack in cart
+     *               deep_quantity index: number of product in cart counting those of pack in cart
+     */
+    public function getProductQuantity($idProduct, $idProductAttribute = 0, $idCustomization = 0, $idAddressDelivery = 0)
+    {
+        $productIsPack = Pack::isPack($idProduct);
+        $defaultPackStockType = Configuration::get('PS_PACK_STOCK_TYPE');
+        $packStockTypesAllowed = array(
+            Pack::STOCK_TYPE_PRODUCTS_ONLY,
+            Pack::STOCK_TYPE_PACK_BOTH
+        );
+        $packStockTypesDefaultSupported = (int) in_array($defaultPackStockType, $packStockTypesAllowed);
+        $firstUnionSql = 'SELECT cp.`quantity` as first_level_quantity, 0 as pack_quantity 
+          FROM `'._DB_PREFIX_.'cart_product` cp';
+        $secondUnionSql = 'SELECT 0 as first_level_quantity, cp.`quantity` * p.`quantity` as pack_quantity
+          FROM `'._DB_PREFIX_.'cart_product` cp' .
+            ' JOIN `'._DB_PREFIX_.'pack` p ON cp.`id_product` = p.`id_product_pack`' .
+            ' JOIN `'._DB_PREFIX_.'product` pr ON p.`id_product_pack` = pr.`id_product`';
+
+        if ($idCustomization) {
+            $customizationJoin = '
+                LEFT JOIN `'._DB_PREFIX_.'customization` c ON (
+                    c.`id_product` = cp.`id_product`
+                    AND c.`id_product_attribute` = cp.`id_product_attribute`
+                )';
+            $firstUnionSql .= $customizationJoin;
+            $secondUnionSql .= $customizationJoin;
+        }
+        $commonWhere = '
+            WHERE cp.`id_product_attribute` = '.(int)$idProductAttribute.'
+            AND cp.`id_customization` = '.(int)$idCustomization.'
+            AND cp.`id_cart` = '.(int)$this->id;
+
+        if (Configuration::get('PS_ALLOW_MULTISHIPPING') && $this->isMultiAddressDelivery()) {
+            $commonWhere .= ' AND cp.`id_address_delivery` = '.(int)$idAddressDelivery;
+        }
+
+        if ($idCustomization) {
+            $commonWhere .= ' AND c.`id_customization` = '.(int)$idCustomization;
+        }
+        $firstUnionSql .=  $commonWhere;
+        $firstUnionSql .= ' AND cp.`id_product` = ' . (int) $idProduct;
+        $secondUnionSql .= $commonWhere;
+        $secondUnionSql .= ' AND p.`id_product_item` = ' . (int) $idProduct;
+        $secondUnionSql .= ' AND (pr.`pack_stock_type` IN (' . implode(',', $packStockTypesAllowed) . ') OR (
+            pr.`pack_stock_type` = ' . Pack::STOCK_TYPE_DEFAULT . '
+            AND ' . $packStockTypesDefaultSupported . ' = 1
+        ))';
+        $parentSql = 'SELECT 
+            COALESCE(SUM(first_level_quantity) + SUM(pack_quantity), 0) as deep_quantity,
+            COALESCE(SUM(first_level_quantity), 0) as quantity 
+          FROM (' . $firstUnionSql . ' UNION ' . $secondUnionSql . ') as q';
+
+        return Db::getInstance()->getRow($parentSql);
+    }
+
+    /**
+     * Check if the Cart contains the given Product (Attribute)
+     *
+     * @deprecated 1.7.3.1
+     * @see Cart::getProductQuantity()
+     *
      * @param int $id_product Product ID
      * @param int $id_product_attribute ProductAttribute ID
      * @param int $id_customization Customization ID
      * @param int $id_address_delivery Delivery Address ID
      *
-     * @return array|bool|null|object Whether the Cart contains the Product
+     * @return array|bool Whether the Cart contains the Product
      *                                Result comes directly from the database
      */
     public function containsProduct($id_product, $id_product_attribute = 0, $id_customization = 0, $id_address_delivery = 0)
     {
-        $sql = 'SELECT cp.`quantity` FROM `'._DB_PREFIX_.'cart_product` cp';
+        $result = $this->getProductQuantity($id_product, $id_product_attribute, $id_customization, $id_address_delivery);
 
-        if ($id_customization) {
-            $sql .= '
-                LEFT JOIN `'._DB_PREFIX_.'customization` c ON (
-                    c.`id_product` = cp.`id_product`
-                    AND c.`id_product_attribute` = cp.`id_product_attribute`
-                )';
+        if (empty($result['quantity'])) {
+            return false;
         }
 
-        $sql .= '
-            WHERE cp.`id_product` = '.(int)$id_product.'
-            AND cp.`id_product_attribute` = '.(int)$id_product_attribute.'
-            AND cp.`id_customization` = '.(int)$id_customization.'
-            AND cp.`id_cart` = '.(int)$this->id;
-        if (Configuration::get('PS_ALLOW_MULTISHIPPING') && $this->isMultiAddressDelivery()) {
-            $sql .= ' AND cp.`id_address_delivery` = '.(int)$id_address_delivery;
-        }
-
-        if ($id_customization) {
-            $sql .= ' AND c.`id_customization` = '.(int)$id_customization;
-        }
-
-        return Db::getInstance()->getRow($sql);
+        return array('quantity' => $result['quantity']);
     }
 
     /**
@@ -1164,7 +1240,8 @@ class CartCore extends ObjectModel
         $operator = 'up',
         $id_address_delivery = 0,
         Shop $shop = null,
-        $auto_add_cart_rule = true
+        $auto_add_cart_rule = true,
+        $skipAvailabilityCheckOutOfStock = false
     ) {
         if (!$shop) {
             $shop = Context::getContext()->shop;
@@ -1229,60 +1306,46 @@ class CartCore extends ObjectModel
 
         if ((int)$quantity <= 0) {
             return $this->deleteProduct($id_product, $id_product_attribute, (int)$id_customization);
-        } elseif (!$product->available_for_order || (Configuration::isCatalogMode() && !defined('_PS_ADMIN_DIR_'))) {
+        } elseif (!$product->available_for_order
+                || (Configuration::isCatalogMode() && !defined('_PS_ADMIN_DIR_'))
+        ) {
             return false;
         } else {
             /* Check if the product is already in the cart */
-            $result = $this->containsProduct($id_product, $id_product_attribute, (int)$id_customization, (int)$id_address_delivery);
+            $cartProductQuantity = $this->getProductQuantity($id_product, $id_product_attribute, (int)$id_customization, (int)$id_address_delivery);
 
             /* Update quantity if product already exist */
-            if ($result) {
+            if (!empty($cartProductQuantity['quantity'])) {
+                $productQuantity = Product::getQuantity($id_product, $id_product_attribute, null, $this);
+                $availableOutOfStock = Product::isAvailableWhenOutOfStock($product->out_of_stock);
+
                 if ($operator == 'up') {
-                    $sql = 'SELECT stock.out_of_stock, IFNULL(stock.quantity, 0) as quantity
-                            FROM '._DB_PREFIX_.'product p
-                            '.Product::sqlStock('p', $id_product_attribute, true, $shop).'
-                            WHERE p.id_product = '.$id_product;
+                    $updateQuantity = '+ ' . $quantity;
+                    $newProductQuantity = $productQuantity - $quantity;
 
-                    $result2 = Db::getInstance()->getRow($sql);
-                    $product_qty = (int)$result2['quantity'];
-                    // Quantity for product pack
-                    if (Pack::isPack($id_product)) {
-                        $product_qty = Pack::getQuantity($id_product, $id_product_attribute);
+                    if ($newProductQuantity < 0 && !$availableOutOfStock && !$skipAvailabilityCheckOutOfStock) {
+                        return false;
                     }
-                    $new_qty = (int)$result['quantity'] + (int)$quantity;
-                    $qty = '+ '.(int)$quantity;
+                } else if ($operator == 'down') {
+                    $cartFirstLevelProductQuantity = $this->getProductQuantity((int) $id_product, (int) $id_product_attribute, $id_customization);
+                    $updateQuantity = '- ' . $quantity;
+                    $newProductQuantity = $productQuantity + $quantity;
 
-                    if (!Product::isAvailableWhenOutOfStock((int)$result2['out_of_stock'])) {
-                        if ($new_qty > $product_qty) {
-                            return false;
-                        }
-                    }
-                } elseif ($operator == 'down') {
-                    $qty = '- '.(int)$quantity;
-                    $new_qty = (int)$result['quantity'] - (int)$quantity;
-                    if ($new_qty < $minimal_quantity && $minimal_quantity > 1) {
-                        return -1;
+                    if ($cartFirstLevelProductQuantity['quantity'] <= 1) {
+                        return $this->deleteProduct((int)$id_product, (int)$id_product_attribute, (int)$id_customization);
                     }
                 } else {
                     return false;
                 }
-
-                /* Delete product from cart */
-                if ($new_qty <= 0) {
-                    return $this->deleteProduct((int)$id_product, (int)$id_product_attribute, (int)$id_customization);
-                } elseif ($new_qty < $minimal_quantity) {
-                    return -1;
-                } else {
-                    Db::getInstance()->execute(
-                        'UPDATE `'._DB_PREFIX_.'cart_product`
-                        SET `quantity` = `quantity` '.$qty.'
-                        WHERE `id_product` = '.(int)$id_product.
-                        ' AND `id_customization` = '.(int)$id_customization.
-                        (!empty($id_product_attribute) ? ' AND `id_product_attribute` = '.(int)$id_product_attribute : '').'
-                        AND `id_cart` = '.(int)$this->id.(Configuration::get('PS_ALLOW_MULTISHIPPING') && $this->isMultiAddressDelivery() ? ' AND `id_address_delivery` = '.(int)$id_address_delivery : '').'
-                        LIMIT 1'
-                    );
-                }
+                Db::getInstance()->execute(
+                    'UPDATE `'._DB_PREFIX_.'cart_product`
+                    SET `quantity` = `quantity` ' . $updateQuantity . '
+                    WHERE `id_product` = '.(int)$id_product.
+                    ' AND `id_customization` = '.(int)$id_customization.
+                    (!empty($id_product_attribute) ? ' AND `id_product_attribute` = '.(int)$id_product_attribute : '').'
+                    AND `id_cart` = '.(int)$this->id.(Configuration::get('PS_ALLOW_MULTISHIPPING') && $this->isMultiAddressDelivery() ? ' AND `id_address_delivery` = '.(int)$id_address_delivery : '').'
+                    LIMIT 1'
+                );
             } elseif ($operator == 'up') {
                 /* Add product to the cart */
 
@@ -1295,10 +1358,10 @@ class CartCore extends ObjectModel
 
                 // Quantity for product pack
                 if (Pack::isPack($id_product)) {
-                    $result2['quantity'] = Pack::getQuantity($id_product, $id_product_attribute);
+                    $result2['quantity'] = Pack::getQuantity($id_product, $id_product_attribute, null, $this);
                 }
 
-                if (!Product::isAvailableWhenOutOfStock((int)$result2['out_of_stock'])) {
+                if (!Product::isAvailableWhenOutOfStock((int)$result2['out_of_stock']) && !$skipAvailabilityCheckOutOfStock) {
                     if ((int)$quantity > $result2['quantity']) {
                         return false;
                     }
@@ -1488,10 +1551,10 @@ class CartCore extends ObjectModel
         Cache::clean('Cart::getCartRules_'.$this->id.'-'.CartRule::FILTER_ACTION_REDUCTION);
         Cache::clean('Cart::getCartRules_'.$this->id.'-'.CartRule::FILTER_ACTION_GIFT);
 
-        Cache::clean('Cart::getCartRules_'.$this->id.'-'.CartRule::FILTER_ACTION_ALL). '-ids';
-        Cache::clean('Cart::getCartRules_'.$this->id.'-'.CartRule::FILTER_ACTION_SHIPPING). '-ids';
-        Cache::clean('Cart::getCartRules_'.$this->id.'-'.CartRule::FILTER_ACTION_REDUCTION). '-ids';
-        Cache::clean('Cart::getCartRules_'.$this->id.'-'.CartRule::FILTER_ACTION_GIFT). '-ids';
+        Cache::clean('Cart::getCartRules_'.$this->id.'-'.CartRule::FILTER_ACTION_ALL. '-ids');
+        Cache::clean('Cart::getCartRules_'.$this->id.'-'.CartRule::FILTER_ACTION_SHIPPING. '-ids');
+        Cache::clean('Cart::getCartRules_'.$this->id.'-'.CartRule::FILTER_ACTION_REDUCTION. '-ids');
+        Cache::clean('Cart::getCartRules_'.$this->id.'-'.CartRule::FILTER_ACTION_GIFT. '-ids');
 
         $result = Db::getInstance()->delete('cart_cart_rule', '`id_cart_rule` = '.(int)$id_cart_rule.' AND `id_cart` = '.(int)$this->id, 1);
 
@@ -1528,24 +1591,6 @@ class CartCore extends ObjectModel
         }
 
         if ((int)$id_customization) {
-            $product_total_quantity = (int)Db::getInstance()->getValue(
-                'SELECT `quantity`
-                FROM `'._DB_PREFIX_.'cart_product`
-                WHERE `id_product` = '.(int)$id_product.'
-                AND `id_customization` = '.(int)$id_customization.'
-                AND `id_cart` = '.(int)$this->id.'
-                AND `id_product_attribute` = '.(int)$id_product_attribute
-            );
-
-            $customization_quantity = (int)Db::getInstance()->getValue('
-            SELECT `quantity`
-            FROM `'._DB_PREFIX_.'customization`
-            WHERE `id_cart` = '.(int)$this->id.'
-            AND `id_product` = '.(int)$id_product.'
-            AND `id_customization` = '.(int)$id_customization.'
-            AND `id_product_attribute` = '.(int)$id_product_attribute.'
-            '.((int)$id_address_delivery ? 'AND `id_address_delivery` = '.(int)$id_address_delivery : ''));
-
             if (!$this->_deleteCustomization((int)$id_customization, (int)$id_product, (int)$id_product_attribute, (int)$id_address_delivery)) {
                 return false;
             }
@@ -1592,7 +1637,7 @@ class CartCore extends ObjectModel
         DELETE FROM `'._DB_PREFIX_.'cart_product`
         WHERE `id_product` = '.(int)$id_product.'
         AND `id_customization` = '.(int)$id_customization.
-        (!is_null($id_product_attribute) ? ' AND `id_product_attribute` = '.(int)$id_product_attribute : '').'
+            (!is_null($id_product_attribute) ? ' AND `id_product_attribute` = '.(int)$id_product_attribute : '').'
         AND `id_cart` = '.(int)$this->id.'
         '.((int)$id_address_delivery ? 'AND `id_address_delivery` = '.(int)$id_address_delivery : ''));
 
@@ -1626,8 +1671,8 @@ class CartCore extends ObjectModel
 
         foreach ($gifts as $gift) {
             if (
-                (int) $gift['id_product_attribute'] === $id_product_attribute &&
-                (int) $gift['id_product'] === $id_product
+                (int) $gift['id_product_attribute'] === $id_product_attribute
+                && (int) $gift['id_product'] === $id_product
             ) {
                 $preservedGifts[$id_product.'-'.$id_product_attribute]++;
             }
@@ -1749,6 +1794,7 @@ class CartCore extends ObjectModel
         $use_cache = true
     ) {
         // Dependencies
+        /** @var \PrestaShop\PrestaShop\Adapter\Product\PriceCalculator $price_calculator */
         $price_calculator = ServiceLocator::get('\\PrestaShop\\PrestaShop\\Adapter\\Product\\PriceCalculator');
 
         $ps_use_ecotax = $this->configuration->get('PS_USE_ECOTAX');
@@ -2138,12 +2184,12 @@ class CartCore extends ObjectModel
     }
 
     /**
-    * Get the gift wrapping price
+     * Get the gift wrapping price
      *
-    * @param bool $with_taxes With or without taxes
+     * @param bool $with_taxes With or without taxes
      *
-    * @return float wrapping price
-    */
+     * @return float wrapping price
+     */
     public function getGiftWrappingPrice($with_taxes = true, $id_address = null)
     {
         static $address = array();
@@ -3028,7 +3074,7 @@ class CartCore extends ObjectModel
             $this->id_carrier = $this->getIdCarrierFromDeliveryOption($delivery_option);
         }
 
-        $this->delivery_option = serialize($delivery_option);
+        $this->delivery_option = json_encode($delivery_option);
     }
 
     /**
@@ -3074,18 +3120,22 @@ class CartCore extends ObjectModel
 
         // The delivery option was selected
         if (isset($this->delivery_option) && $this->delivery_option != '') {
-            $delivery_option = Tools::unSerialize($this->delivery_option);
+            $delivery_option = json_decode($this->delivery_option, true);
             $validated = true;
-            foreach ($delivery_option as $id_address => $key) {
-                if (!isset($delivery_option_list[$id_address][$key])) {
-                    $validated = false;
-                    break;
-                }
-            }
 
-            if ($validated) {
-                $cache[$cache_id] = $delivery_option;
-                return $delivery_option;
+            if (is_array($delivery_option)) {
+                foreach ($delivery_option as $id_address => $key) {
+                    if (!isset($delivery_option_list[$id_address][$key])) {
+                        $validated = false;
+                        break;
+                    }
+                }
+
+                if ($validated) {
+                    $cache[$cache_id] = $delivery_option;
+
+                    return $delivery_option;
+                }
             }
         }
 
@@ -3131,29 +3181,25 @@ class CartCore extends ObjectModel
      */
     public function getTotalShippingCost($delivery_option = null, $use_tax = true, Country $default_country = null)
     {
-        static $_total_shipping;
+        if (isset(Context::getContext()->cookie->id_country)) {
+            $default_country = new Country(Context::getContext()->cookie->id_country);
+        }
+        if (is_null($delivery_option)) {
+            $delivery_option = $this->getDeliveryOption($default_country, false, false);
+        }
 
-        if (null === $_total_shipping) {
-            if (isset(Context::getContext()->cookie->id_country)) {
-                $default_country = new Country(Context::getContext()->cookie->id_country);
-            }
-            if (is_null($delivery_option)) {
-                $delivery_option = $this->getDeliveryOption($default_country, false, false);
+        $_total_shipping = array(
+            'with_tax' => 0,
+            'without_tax' => 0,
+        );
+        $delivery_option_list = $this->getDeliveryOptionList($default_country);
+        foreach ($delivery_option as $id_address => $key) {
+            if (!isset($delivery_option_list[$id_address]) || !isset($delivery_option_list[$id_address][$key])) {
+                continue;
             }
 
-            $_total_shipping = array(
-                'with_tax' => 0,
-                'without_tax' => 0,
-            );
-            $delivery_option_list = $this->getDeliveryOptionList($default_country);
-            foreach ($delivery_option as $id_address => $key) {
-                if (!isset($delivery_option_list[$id_address]) || !isset($delivery_option_list[$id_address][$key])) {
-                    continue;
-                }
-
-                $_total_shipping['with_tax'] += $delivery_option_list[$id_address][$key]['total_price_with_tax'];
-                $_total_shipping['without_tax'] += $delivery_option_list[$id_address][$key]['total_price_without_tax'];
-            }
+            $_total_shipping['with_tax'] += $delivery_option_list[$id_address][$key]['total_price_with_tax'];
+            $_total_shipping['without_tax'] += $delivery_option_list[$id_address][$key]['total_price_without_tax'];
         }
 
         return ($use_tax) ? $_total_shipping['with_tax'] : $_total_shipping['without_tax'];
@@ -3172,31 +3218,28 @@ class CartCore extends ObjectModel
      */
     public function getCarrierCost($id_carrier, $useTax = true, Country $default_country = null, $delivery_option = null)
     {
-        if (empty(self::$_total_shipping)) {
-            if (is_null($delivery_option)) {
-                $delivery_option = $this->getDeliveryOption($default_country);
-            }
-
-            $total_shipping = 0;
-            $delivery_option_list = $this->getDeliveryOptionList();
-
-
-            foreach ($delivery_option as $id_address => $key) {
-                if (!isset($delivery_option_list[$id_address]) || !isset($delivery_option_list[$id_address][$key])) {
-                    continue;
-                }
-                if (isset($delivery_option_list[$id_address][$key]['carrier_list'][$id_carrier])) {
-                    if ($useTax) {
-                        $total_shipping += $delivery_option_list[$id_address][$key]['carrier_list'][$id_carrier]['price_with_tax'];
-                    } else {
-                        $total_shipping += $delivery_option_list[$id_address][$key]['carrier_list'][$id_carrier]['price_without_tax'];
-                    }
-                }
-            }
-
-            self::$_total_shipping = $total_shipping;
+        if (is_null($delivery_option)) {
+            $delivery_option = $this->getDeliveryOption($default_country);
         }
-        return self::$_total_shipping;
+
+        $total_shipping = 0;
+        $delivery_option_list = $this->getDeliveryOptionList();
+
+
+        foreach ($delivery_option as $id_address => $key) {
+            if (!isset($delivery_option_list[$id_address]) || !isset($delivery_option_list[$id_address][$key])) {
+                continue;
+            }
+            if (isset($delivery_option_list[$id_address][$key]['carrier_list'][$id_carrier])) {
+                if ($useTax) {
+                    $total_shipping += $delivery_option_list[$id_address][$key]['carrier_list'][$id_carrier]['price_with_tax'];
+                } else {
+                    $total_shipping += $delivery_option_list[$id_address][$key]['carrier_list'][$id_carrier]['price_without_tax'];
+                }
+            }
+        }
+
+        return $total_shipping;
     }
 
     /**
@@ -3239,7 +3282,7 @@ class CartCore extends ObjectModel
         }
 
         if (is_null($product_list)) {
-            $products = $this->getProducts();
+            $products = $this->getProducts(false, false, null, false);
         } else {
             $products = $product_list;
         }
@@ -3332,7 +3375,7 @@ class CartCore extends ObjectModel
                 $shipping_method = $carrier->getShippingMethod();
                 // Get only carriers that are compliant with shipping method
                 if (($shipping_method == Carrier::SHIPPING_METHOD_WEIGHT && $carrier->getMaxDeliveryPriceByWeight((int)$id_zone) === false)
-                || ($shipping_method == Carrier::SHIPPING_METHOD_PRICE && $carrier->getMaxDeliveryPriceByPrice((int)$id_zone) === false)) {
+                    || ($shipping_method == Carrier::SHIPPING_METHOD_PRICE && $carrier->getMaxDeliveryPriceByPrice((int)$id_zone) === false)) {
                     unset($result[$k]);
                     continue;
                 }
@@ -3346,7 +3389,7 @@ class CartCore extends ObjectModel
 
                     // Get only carriers that have a range compatible with cart
                     if (($shipping_method == Carrier::SHIPPING_METHOD_WEIGHT && !$check_delivery_price_by_weight)
-                    || ($shipping_method == Carrier::SHIPPING_METHOD_PRICE && !$check_delivery_price_by_price)) {
+                        || ($shipping_method == Carrier::SHIPPING_METHOD_PRICE && !$check_delivery_price_by_price)) {
                         unset($result[$k]);
                         continue;
                     }
@@ -3450,8 +3493,8 @@ class CartCore extends ObjectModel
             }
 
             if (($shipping_method == Carrier::SHIPPING_METHOD_WEIGHT && !Carrier::checkDeliveryPriceByWeight($carrier->id, $this->getTotalWeight(), (int)$id_zone))
-            || ($shipping_method == Carrier::SHIPPING_METHOD_PRICE && !Carrier::checkDeliveryPriceByPrice($carrier->id, $total_package_without_shipping_tax_inc, $id_zone, (int)$this->id_currency)
-            )) {
+                || ($shipping_method == Carrier::SHIPPING_METHOD_PRICE && !Carrier::checkDeliveryPriceByPrice($carrier->id, $total_package_without_shipping_tax_inc, $id_zone, (int)$this->id_currency)
+                )) {
                 $shipping_cost += 0;
             } else {
                 if ($shipping_method == Carrier::SHIPPING_METHOD_WEIGHT) {
@@ -3516,8 +3559,8 @@ class CartCore extends ObjectModel
         if (Configuration::get('PS_ATCP_SHIPWRAP')) {
             if (!$use_tax) {
                 // With PS_ATCP_SHIPWRAP, we deduce the pre-tax price from the post-tax
-                    // price. This is on purpose and required in Germany.
-                    $shipping_cost /= (1 + $this->getAverageProductsTaxRate());
+                // price. This is on purpose and required in Germany.
+                $shipping_cost /= (1 + $this->getAverageProductsTaxRate());
             }
         } else {
             // Apply tax
@@ -3533,10 +3576,10 @@ class CartCore extends ObjectModel
     }
 
     /**
-    * Return total Cart weight
+     * Return total Cart weight
      *
-    * @return float Total Cart weight
-    */
+     * @return float Total Cart weight
+     */
     public function getTotalWeight($products = null)
     {
         if (!is_null($products)) {
@@ -3615,10 +3658,10 @@ class CartCore extends ObjectModel
     }
 
     /**
-    * Return useful information about the cart
-    *
-    * @return array Cart details
-    */
+     * Return useful information about the cart
+     *
+     * @return array Cart details
+     */
     public function getSummaryDetails($id_lang = null, $refresh = false)
     {
         $context = Context::getContext();
@@ -3796,6 +3839,18 @@ class CartCore extends ObjectModel
                 || (!$product['allow_oosp'] && $product['stock_quantity'] < $product['cart_quantity'])) {
                 return $return_product ? $product : false;
             }
+            if (!$product['allow_oosp']) {
+                $productQuantity = Product::getQuantity(
+                    $product['id_product'],
+                    $product['id_product_attribute'],
+                    null,
+                    $this,
+                    $product['id_customization']
+                );
+                if ($productQuantity < 0) {
+                    return $return_product ? $product : false;
+                }
+            }
         }
 
         return true;
@@ -3847,10 +3902,10 @@ class CartCore extends ObjectModel
     }
 
     /**
-    * Check if cart contains only virtual products
-    *
-    * @return bool true if is a virtual cart or false
-    */
+     * Check if cart contains only virtual products
+     *
+     * @return bool true if is a virtual cart or false
+     */
     public function isVirtualCart()
     {
         if (!ProductDownload::isFeatureActive()) {
@@ -4078,7 +4133,11 @@ class CartCore extends ObjectModel
         $success = true;
         $products = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('SELECT * FROM `'._DB_PREFIX_.'cart_product` WHERE `id_cart` = '.(int)$this->id);
 
-        $product_gift = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('SELECT cr.`gift_product`, cr.`gift_product_attribute` FROM `'._DB_PREFIX_.'cart_rule` cr LEFT JOIN `'._DB_PREFIX_.'order_cart_rule` ocr ON (ocr.`id_order` = '.(int)$this->id.') WHERE ocr.`id_cart_rule` = cr.`id_cart_rule`');
+        $orderId = Order::getIdByCartId((int)$this->id);
+        $product_gift = array();
+        if ($orderId) {
+            $product_gift = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('SELECT cr.`gift_product`, cr.`gift_product_attribute` FROM `'._DB_PREFIX_.'cart_rule` cr LEFT JOIN `'._DB_PREFIX_.'order_cart_rule` ocr ON (ocr.`id_order` = '.(int)$orderId.') WHERE ocr.`id_cart_rule` = cr.`id_cart_rule`');
+        }
 
         $id_address_delivery = Configuration::get('PS_ALLOW_MULTISHIPPING') ? $cart->id_address_delivery : 0;
 
@@ -4106,8 +4165,8 @@ class CartCore extends ObjectModel
         $new_customization_method = (int)Db::getInstance()->getValue('
             SELECT COUNT(`id_customization`) FROM `'._DB_PREFIX_.'cart_product`
             WHERE `id_cart` = '.(int)$this->id.
-            ' AND `id_customization` != 0'
-        ) > 0;
+                ' AND `id_customization` != 0'
+            ) > 0;
 
         // Insert new customizations
         $custom_ids = array();
@@ -4622,36 +4681,53 @@ class CartCore extends ObjectModel
      * Are all products of the Cart in stock?
      *
      * @param bool $ignore_virtual Ignore virtual products
-     * @param bool $exclusive If true, the validation is exclusive : it must be present product in stock and out of stock
+     * @param bool $exclusive (DEPRECATED) If true, the validation is exclusive : it must be present product in stock and out of stock
      * @since 1.5.0
      *
      * @return bool False if not all products in the cart are in stock
      */
-    public function isAllProductsInStock($ignore_virtual = false, $exclusive = false)
+    public function isAllProductsInStock($ignoreVirtual = false, $exclusive = false)
     {
-        $product_out_of_stock = 0;
-        $product_in_stock = 0;
+        if (func_num_args() > 1) {
+            @trigger_error(
+                '$exclusive parameter is deprecated since version 1.7.3.2 and will be removed in the next major version.',
+                E_USER_DEPRECATED
+            );
+        }
+        $productOutOfStock = 0;
+        $productInStock = 0;
+
         foreach ($this->getProducts() as $product) {
-            if (!$exclusive) {
-                if (((int)$product['quantity_available'] - (int)$product['cart_quantity']) < 0
-                    && (!$ignore_virtual || !$product['is_virtual'])) {
-                    return false;
-                }
-            } else {
-                if ((int)$product['quantity_available'] <= 0
-                    && (!$ignore_virtual || !$product['is_virtual'])) {
-                    $product_out_of_stock++;
-                }
-                if ((int)$product['quantity_available'] > 0
-                    && (!$ignore_virtual || !$product['is_virtual'])) {
-                    $product_in_stock++;
+            if ($ignoreVirtual && $product['is_virtual']) {
+                continue;
+            }
+            $idProductAttribute = !empty($product['id_product_attribute']) ? $product['id_product_attribute'] : null;
+            $availableOutOfStock = Product::isAvailableWhenOutOfStock($product['out_of_stock']);
+            $productQuantity = Product::getQuantity(
+                $product['id_product'],
+                $idProductAttribute,
+                null,
+                $this,
+                $product['id_customization']
+            );
+
+            if (!$exclusive
+                && ($productQuantity < 0 && !$availableOutOfStock)
+            ) {
+                return false;
+            } else if ($exclusive) {
+                if ($productQuantity <= 0) {
+                    $productOutOfStock++;
+                } else {
+                    $productInStock++;
                 }
 
-                if ($product_in_stock > 0 && $product_out_of_stock > 0) {
+                if ($productInStock > 0 && $productOutOfStock > 0) {
                     return false;
                 }
             }
         }
+
         return true;
     }
 

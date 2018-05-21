@@ -6,13 +6,13 @@
         <source>Products</source>
         <target>Products</target>
         <note>Context:
-File: modules/ps_linklist/src/LinkBlockRepository.php:273</note>
+File: modules/ps_linklist/src/LinkBlockRepository.php:275</note>
       </trans-unit>
       <trans-unit id="ebdaa50b843565605176eb40816e77fe">
         <source>Our company</source>
         <target>Our company</target>
         <note>Context:
-File: modules/ps_linklist/src/LinkBlockRepository.php:274</note>
+File: modules/ps_linklist/src/LinkBlockRepository.php:276</note>
       </trans-unit>
     </body>
   </file>

@@ -1,6 +1,7 @@
 language: php
 
 addons:
+    chrome: stable
     apt:
         packages:
         - apache2
@@ -21,14 +22,23 @@ php:
   - 5.6
   - 7.0
 
+env:
+    global:
+        - SYMFONY_DEPRECATIONS_HELPER=disabled
+
+matrix:
+  include:
+    - php: 7.1
+      env: EXTRA_TESTS=functional
+
 before_install:
   # Apache & php-fpm configuration
   - bash travis-scripts/setup-php-fpm.sh
   - bash travis-scripts/setup-apache.sh
 
   # PrestaShop configuration
-  - cp -Rf .composer/* ~/.composer/ & composer global install;
   - cp tests/parameters.yml.travis app/config/parameters.yml
+
 
 notifications:
   hipchat: ec4e21c5eb82066ba8be5fd1afefde@1184657
@@ -37,11 +47,14 @@ script:
   - composer install --prefer-dist --no-interaction --no-progress
   - bash tests/check_file_syntax.sh
   - bash travis-scripts/install-prestashop
-  - php bin/phpunit -c tests/
-  - SYMFONY_DEPRECATIONS_HELPER=disabled php bin/phpunit -c tests/phpunit-admin.xml
-  - composer phpunit-sf
-  - composer phpunit-controllers
+  - php app/console lint:twig src
+  - php app/console lint:twig app
+  - composer run-script test --timeout=0
+  - composer run-script test-admin --timeout=0
+  - composer run-script phpunit-sf --timeout=0
+  - composer run-script phpunit-controllers --timeout=0
   - bash ./travis-scripts/run-selenium-tests
+  - bash ./travis-scripts/run-functional-tests # Must run before starter theme
   - bash ./travis-scripts/test-startertheme
 
 after_script:
@@ -54,3 +67,4 @@ after_failure:
   - sudo cat /var/log/php-fpm.log
   - sudo ls -l /var/log/apache2
   - sudo cat /var/log/apache2/other_vhosts_access.log
+  - bash ./travis-scripts/base64-screenshots # As we cannot upload file, we display the base64 encoded content of the screenshots

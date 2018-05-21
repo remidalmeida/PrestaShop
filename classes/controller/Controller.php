@@ -7,7 +7,7 @@
  * This source file is subject to the Open Software License (OSL 3.0)
  * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
@@ -20,9 +20,11 @@
  *
  * @author    PrestaShop SA <contact@prestashop.com>
  * @copyright 2007-2017 PrestaShop SA
- * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
+
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * @TODO Move undeclared variables and methods to this (base) class: $errors, $layout, checkLiveEditAccess, etc.
@@ -30,60 +32,106 @@
  */
 abstract class ControllerCore
 {
-    /** @var Context */
+    /**
+     * @var Context
+     */
     protected $context;
 
-    /** @var array List of CSS files */
+    /**
+     * List of CSS files
+     * @var array
+     */
     public $css_files = array();
 
-    /** @var array List of JavaScript files */
+    /**
+     * List of JavaScript files
+     * @var array
+     */
     public $js_files = array();
 
-    /** @var array List of PHP errors */
+    /**
+     * List of PHP errors
+     * @var array
+     */
     public static $php_errors = array();
 
-    /** @var bool Set to true to display page header */
+    /**
+     * Set to true to display page header
+     * @var bool
+     */
     protected $display_header;
 
-    /** @var bool Set to true to display page header javascript */
+    /**
+     * Set to true to display page header javascript
+     * @var bool
+     */
     protected $display_header_javascript;
 
-    /** @var string Template filename for the page content */
+    /**
+     * Template filename for the page content
+     * @var string
+     */
     protected $template;
 
-    /** @var string Set to true to display page footer */
+    /**
+     * Set to true to display page footer
+     * @var string
+     */
     protected $display_footer;
 
-    /** @var bool Set to true to only render page content (used to get iframe content) */
+    /**
+     * Set to true to only render page content (used to get iframe content)
+     * @var bool
+     */
     protected $content_only = false;
 
-    /** @var bool If AJAX parameter is detected in request, set this flag to true */
+    /**
+     * If AJAX parameter is detected in request, set this flag to true
+     * @var bool
+     */
     public $ajax = false;
 
-    /** @var bool If set to true, page content and messages will be encoded to JSON before responding to AJAX request */
+    /**
+     * If set to true, page content and messages will be encoded to JSON before responding to AJAX request
+     * @var bool
+     */
     protected $json = false;
 
-    /** @var string JSON response status string */
+    /**
+     * JSON response status string
+     * @var string
+     */
     protected $status = '';
 
     /**
+     * Redirect link. If not empty, the user will be redirected after initializing and processing input.
      * @see Controller::run()
-     * @var string|null Redirect link. If not empty, the user will be redirected after initializing and processing input.
+     * @var string|null
      */
     protected $redirect_after = null;
 
-    /** @var string Controller type. Possible values: 'front', 'modulefront', 'admin', 'moduleadmin' */
+    /**
+     * Controller type. Possible values: 'front', 'modulefront', 'admin', 'moduleadmin'
+     * @var string
+     */
     public $controller_type;
 
-    /** @var string Controller name */
+    /**
+     * Controller name
+     * @var string
+     */
     public $php_self;
 
-    /** @var PrestaShopBundle\Translation\Translator */
+    /**
+     * @var PrestaShopBundle\Translation\Translator
+     */
     protected $translator;
 
-    /** @var ContainerBuilder legacy container */
+    /**
+     * Dependency container
+     * @var ContainerBuilder
+     */
     protected $container;
-
 
     /**
      * Check if the controller is available for the current user/visitor
@@ -380,7 +428,11 @@ abstract class ControllerCore
                 }
             }
 
-            if ($css_path && isset($this->css_files[key($css_path)]) && ($this->css_files[key($css_path)] == reset($css_path))) {
+            if (
+                $css_path
+                && isset($this->css_files[key($css_path)])
+                && ($this->css_files[key($css_path)] == reset($css_path))
+            ) {
                 unset($this->css_files[key($css_path)]);
             }
         }
@@ -502,7 +554,6 @@ abstract class ControllerCore
                 $this->addCSS(key($plugin_path['css']), 'all', null, false);
             }
         }
-
     }
 
     /**
@@ -513,7 +564,10 @@ abstract class ControllerCore
      */
     public function isXmlHttpRequest()
     {
-        return (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
+        return (
+            !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
+            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
+        );
     }
 
     public function getLayout()
@@ -643,15 +697,36 @@ abstract class ControllerCore
     }
 
     /**
-     * Construct the container of dependencies
+     * Construct the dependency container
+     *
+     * @return ContainerBuilder
      */
-    protected function buildContainer(){}
+    protected function buildContainer()
+    {
+    }
 
+    /**
+     * Gets a service from the service container.
+     *
+     * @param string $serviceId Service identifier
+     *
+     * @return object The associated service
+     * @throws Exception
+     */
     public function get($serviceId)
     {
         return $this->container->get($serviceId);
     }
 
+    /**
+     * Gets a parameter.
+     *
+     * @param string $parameterId The parameter name
+     *
+     * @return mixed The parameter value
+     *
+     * @throws InvalidArgumentException if the parameter is not defined
+     */
     public function getParameter($parameterId)
     {
         return $this->container->getParameter($parameterId);

@@ -7,7 +7,7 @@
  * This source file is subject to the Open Software License (OSL 3.0)
  * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
@@ -20,7 +20,7 @@
  *
  * @author    PrestaShop SA <contact@prestashop.com>
  * @copyright 2007-2017 PrestaShop SA
- * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
 
@@ -87,7 +87,7 @@ class MailCore extends ObjectModel
      *
      * @return bool|int Whether sending was successful. If not at all, false, otherwise amount of recipients succeeded.
      */
-    public static function Send(
+    public static function send(
         $idLang,
         $template,
         $subject,
@@ -103,13 +103,13 @@ class MailCore extends ObjectModel
         $idShop = null,
         $bcc = null,
         $replyTo = null,
-        $replyToName = null)
-    {
+        $replyToName = null
+    ) {
         if (!$idShop) {
             $idShop = Context::getContext()->shop->id;
         }
 
-        $skip = array_reduce(Hook::exec(
+        $keepGoing = array_reduce(Hook::exec(
            'actionEmailSendBefore',
             array(
                 'idLang' => &$idLang,
@@ -131,11 +131,11 @@ class MailCore extends ObjectModel
             null,
             true
         ), function ($carry, $item) {
-            return $carry && $item;
+            return ($item === false) ? false : $carry;
         }, true);
 
-        if (!$skip) {
-	        return true;
+        if (!$keepGoing) {
+            return true;
         }
 
         if (is_numeric($idShop) && $idShop) {
@@ -552,7 +552,7 @@ class MailCore extends ObjectModel
         $from,
         $smtpLogin,
         $smtpPassword,
-        $smtpPort = 25,
+        $smtpPort,
         $smtpEncryption
     ) {
         $result = false;

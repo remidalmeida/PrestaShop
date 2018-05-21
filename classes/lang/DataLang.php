@@ -7,7 +7,7 @@
  * This source file is subject to the Open Software License (OSL 3.0)
  * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
@@ -20,7 +20,7 @@
  *
  * @author    PrestaShop SA <contact@prestashop.com>
  * @copyright 2007-2017 PrestaShop SA
- * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
 
@@ -40,9 +40,6 @@ class DataLangCore
     /** @var array */
     protected $fieldsToUpdate;
 
-    /** @var array */
-    protected $fieldNames;
-
     /** @var string */
     protected $domain;
 
@@ -50,38 +47,36 @@ class DataLangCore
     {
         $this->locale = $locale;
 
-        $this->translator = new Translator(
-            $this->locale,
-            null,
-            _PS_CACHE_DIR_.'/translations/'.$this->locale,
-            false
-        );
+        $legacyTranslator = Context::getContext()->getTranslator();
+        $legacyLocale = $legacyTranslator->getLocale();
 
-        $this->translator->addLoader('xlf', new \Symfony\Component\Translation\Loader\XliffFileLoader());
+        if ($legacyLocale === $this->locale) {
+            $this->translator = $legacyTranslator;
+        } else {
+            $this->translator = new Translator(
+                $this->locale,
+                null,
+                _PS_CACHE_DIR_ . '/translations/' . $this->locale,
+                false
+            );
 
-        $finder = \Symfony\Component\Finder\Finder::create()
-            ->files()
-            ->name('*.'.$this->locale.'.xlf')
-            ->in((_PS_ROOT_DIR_ . '/app/Resources/translations'))
-        ;
+            $this->translator->addLoader('xlf', new \Symfony\Component\Translation\Loader\XliffFileLoader());
 
-        foreach ($finder as $file) {
-            list($domain, $locale, $format) = explode('.', $file->getBasename(), 3);
-            $this->translator->addResource($format, $file, $locale, $domain);
+            $finder = \Symfony\Component\Finder\Finder::create()
+                ->files()
+                ->name('*.' . $this->locale . '.xlf')
+                ->in((_PS_ROOT_DIR_ . '/app/Resources/translations'));
+
+            foreach ($finder as $file) {
+                list($domain, $locale, $format) = explode('.', $file->getBasename(), 3);
+                $this->translator->addResource($format, $file, $locale, $domain);
+            }
         }
-
-        $this->init();
     }
 
     public function getFieldValue($field, $value)
     {
-        $md5Value = md5($value);
-
-        if (isset($this->fieldNames[$field]) && isset($this->fieldNames[$field][$md5Value])) {
-            return $this->fieldNames[$field][$md5Value];
-        }
-
-        return $value;
+        return $this->translator->trans($value, array(), $this->domain, $this->locale);
     }
 
     public function getKeys()
@@ -92,11 +87,6 @@ class DataLangCore
     public function getFieldsToUpdate()
     {
         return $this->fieldsToUpdate;
-    }
-
-    protected function init()
-    {
-        $this->fieldNames = array();
     }
 
     public function slugify($string)
