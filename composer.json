@@ -102,11 +102,19 @@
         "prestashop/ps_categoryproducts": "dev-master",
         "prestashop/ps_crossselling": "dev-master",
         "prestashop/ps_newproducts": "dev-master",
+        "megashop/tptncopyright": "dev-master",
+        "megashop/tptnheaderlinks": "dev-master",
+        "megashop/tptnhomeslider": "dev-master",
+        "megashop/tptnmobilemenu": "dev-master",
+        "megashop/tptnprodcarousel": "dev-master",
+        "megashop/tptnsocial": "dev-master",
+        "megashop/tptnsubbanner": "dev-master",
+        "megashop/tptnthemeconfig": "dev-master",
         "remidalmeida/c4w_sageconvector": "dev-master",
         "remidalmeida/c4w_privatesales": "dev-master",
         "remidalmeida/c4w_fakepayment": "dev-master",
         "remidalmeida/c4w_customexport": "dev-master",
-"remidalmeida/prestashop-sage-theme": "dev-master"
+        "remidalmeida/prestashop-sage-theme": "dev-master"
     },
     "repositories": [
         {
