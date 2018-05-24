@@ -97,12 +97,24 @@
         "composer/ca-bundle": "^1.0",
         "nikic/php-parser": "^2.1",
         "prestashop/decimal": "^1.0.0",
-        "cssjanus/cssjanus": "dev-patch-1"
+        "cssjanus/cssjanus": "dev-patch-1",
+        "prestashop/ps_bestsellers": "dev-master",
+        "prestashop/ps_categoryproducts": "dev-master",
+        "prestashop/ps_crossselling": "dev-master",
+        "prestashop/ps_newproducts": "dev-master",
+        "remidalmeida/c4w_sageconvector": "dev-master",
+        "remidalmeida/c4w_privatesales": "dev-master",
+        "remidalmeida/c4w_fakepayment": "dev-master",
+        "remidalmeida/c4w_customexport": "dev-master",
+"remidalmeida/prestashop-sage-theme": "dev-master"
     },
     "repositories": [
         {
             "type": "vcs",
             "url": "https://github.com/prestashop/php-cssjanus"
+        },
+        {   "type": "composer",
+            "url": "https://packages.remid.ovh/sage/"
         }
     ],
     "require-dev": {
@@ -120,7 +132,8 @@
     "autoload": {
         "psr-4": {
             "PrestaShop\\PrestaShop\\": "src/",
-            "PrestaShopBundle\\": "src/PrestaShopBundle/"
+            "PrestaShopBundle\\": "src/PrestaShopBundle/",
+            "PrestaShop\\Module\\C4W_SageConvector\\Composer\\": "modules/c4w_sageconvector/composer/"
         }
     },
     "scripts": {
@@ -136,7 +149,8 @@
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::prepareDeploymentTarget"
+            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::prepareDeploymentTarget",
+            "PrestaShop\\Module\\C4W_SageConvector\\Composer\\Update::createSageTree"
         ],
         "create-test-db": [
             "PrestaShopBundle\\Tests\\Utils\\Database::createTestDB"
