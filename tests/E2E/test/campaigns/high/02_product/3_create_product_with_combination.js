@@ -4,30 +4,32 @@ const {AccessPageFO} = require('../../../selectors/FO/access_page');
 const {SearchProductPage} = require('../../../selectors/FO/search_product_page');
 const {productPage} = require('../../../selectors/FO/product_page');
 const {Menu} = require('../../../selectors/BO/menu.js');
-var data = require('./../../../datas/product-data');
+let data = require('./../../../datas/product-data');
 let promise = Promise.resolve();
 global.productVariations = [];
 
 scenario('Create product with combination in the Back Office', client => {
   test('should open browser', () => client.open());
   test('should log in successfully in BO', () => client.signInBO(AccessPageBO));
-  test('should go to "Catalog"', () => client.waitForExistAndClick(Menu.Sell.Catalog.catalog_menu));
+  test('should go to "Catalog" page', () => client.goToSubtabMenuPage(Menu.Sell.Catalog.catalog_menu, Menu.Sell.Catalog.products_submenu));
   test('should click on "NEW PRODUCT" button', () => client.waitForExistAndClick(AddProductPage.new_product_button));
 
   scenario('Edit Basic settings', client => {
     test('should set the "product name" input', () => client.waitAndSetValue(AddProductPage.product_name_input, data.standard.name + 'C' + date_time));
+    test('should set the "Summary" text', () => client.setEditorText(AddProductPage.summary_textarea, data.common.summary));
+    test('should click on "Description" tab', () => client.waitForExistAndClick(AddProductPage.tab_description));
+    test('should set the "Description" text', () => client.setEditorText(AddProductPage.description_textarea, data.common.description));
     test('should select the "Pack of products"', () => client.waitForExistAndClick(AddProductPage.product_combinations));
     test('should upload the first product picture', () => client.uploadPicture('1.png', AddProductPage.picture));
     test('should upload the second product picture', () => client.uploadPicture('2.jpg', AddProductPage.picture));
     test('should click on "CREATE A CATEGORY"', () => client.scrollWaitForExistAndClick(AddProductPage.product_create_category_btn, 50));
-    test('should set the "New category name"', () => client.waitAndSetValue(AddProductPage.product_category_name_input, data.standard.new_category_name + 'Combination' + date_time));
+    test('should set the "New category name"', () => client.waitAndSetValue(AddProductPage.product_category_name_input, data.standard.new_category_name + 'C' + date_time));
     test('should click on "Create"', () => client.createCategory());
     test('open all category', () => client.openAllCategory());
     test('should choose the created category as default', () => {
       return promise
-        .then(() => client.scrollTo(AddProductPage.category_radio.replace('%S', data.standard.new_category_name + 'Combination' + date_time)))
-        .then(() => client.waitForExistAndClick(AddProductPage.category_radio.replace('%S', data.standard.new_category_name + 'Combination' + date_time), 4000));
-
+        .then(() => client.waitForVisible(AddProductPage.created_category))
+        .then(() => client.waitForExistAndClick(AddProductPage.home_delete_button));
     });
     test('should click on "ADD A BRAND" button', () => client.scrollWaitForExistAndClick(AddProductPage.product_add_brand_btn, 50));
     test('should select brand', () => {
@@ -40,7 +42,16 @@ scenario('Create product with combination in the Back Office', client => {
     test('should click on "ADD A FEATURE" and select one', () => client.addFeatureHeight('combination'));
     test('should set "Tax exclude" price', () => client.setPrice(AddProductPage.priceTE_shortcut, data.common.priceTE));
     test('should set the "Reference" input', () => client.waitAndSetValue(AddProductPage.product_reference, data.common.product_reference));
-    test('should set the product "online"', () => client.waitForExistAndClick(AddProductPage.product_online_toggle));
+    test('should switch the product online', () =>  {
+      return promise
+        .then(() => client.isVisible(AddProductPage.symfony_toolbar))
+        .then(() => {
+          if (global.isVisible) {
+            client.waitForExistAndClick(AddProductPage.symfony_toolbar);
+          }
+        })
+        .then(() => client.waitForExistAndClick(AddProductPage.product_online_toggle, 3000));
+    });
   }, 'product/product');
 
   scenario('Edit product shipping', client => {
@@ -135,13 +146,13 @@ scenario('Create product with combination in the Back Office', client => {
         .then(() => client.showElement("td.attribute-price", 1))
         .then(() => client.waitAndSetValue(AddProductPage.combination_impact_price_input.replace('%NUMBER', global.combinationId), '2,5'));
     });
-    test('should click on "Basic settings"', () => client.scrollWaitForExistAndClick(AddProductPage.basic_settings_tab, 50));
+    test('should click on "Basic settings" tab', () => client.scrollWaitForExistAndClick(AddProductPage.basic_settings_tab, 50));
     test('should set the "Tax exclude" price', () => {
       return promise
         .then(() => client.scrollTo(AddProductPage.priceTE_shortcut, 50))
         .then(() => client.waitAndSetValue(AddProductPage.priceTE_shortcut, data.common.priceTE));
     });
-    test('should click on "Combinations"', () => client.scrollWaitForExistAndClick(AddProductPage.product_combinations_tab, 50));
+    test('should click on "Combinations" tab', () => client.scrollWaitForExistAndClick(AddProductPage.product_combinations_tab, 50));
     test('should check that the final price is equal to "26.666666 €"', () => {
       return promise
         .then(() => client.showElement("td.attribute-finalprice", 1))
@@ -165,13 +176,13 @@ scenario('Create product with combination in the Back Office', client => {
       test('should click on "SEO" tab', () => client.scrollWaitForExistAndClick(AddProductPage.product_SEO_tab, 50));
       test('should set the "Meta title" input', () => client.waitAndSetValue(AddProductPage.SEO_meta_title, data.common.metatitle));
       test('should set the "Meta description" input', () => client.waitAndSetValue(AddProductPage.SEO_meta_description, data.common.metadesc));
-      test('should set the "Friendly URL"', () => client.waitAndSetValue(AddProductPage.SEO_friendly_url, data.common.shortlink));
+      test('should set the "Friendly URL" input', () => client.waitAndSetValue(AddProductPage.SEO_friendly_url, data.common.shortlink));
     }, 'product/product');
 
     scenario('Edit product options', client => {
       test('should click on "Options" tab', () => client.scrollWaitForExistAndClick(AddProductPage.product_options_tab));
       test('should select the "Visibility"', () => client.waitAndSelectByValue(AddProductPage.options_visibility, 'both'));
-      test('should click on "Web only (not sold in your retail store)"', () => client.waitForExistAndClick(AddProductPage.options_online_only));
+      test('should click on "Web only (not sold in your retail store)" checkbox', () => client.waitForExistAndClick(AddProductPage.options_online_only));
       test('should select the "Condition"', () => client.selectCondition());
       test('should set the "ISBN" input', () => client.waitAndSetValue(AddProductPage.options_isbn, data.common.isbn));
       test('should set the "EAN-13" input', () => client.waitAndSetValue(AddProductPage.options_ean13, data.common.ean13));
@@ -179,14 +190,14 @@ scenario('Create product with combination in the Back Office', client => {
       test('should click on "ADD A CUSTOMIZAITION" button', () => client.scrollWaitForExistAndClick(AddProductPage.options_add_customization_field_button, 50));
       test('should set the customization field "Label"', () => client.waitAndSetValue(AddProductPage.options_first_custom_field_label, data.common.personalization.perso_text.name));
       test('should select the customization field "Type" Text', () => client.waitAndSelectByValue(AddProductPage.options_first_custom_field_type, '1'));
-      test('should click on "Required"', () => client.waitForExistAndClick(AddProductPage.options_first_custom_field_require));
+      test('should click on "Required" checkbox', () => client.waitForExistAndClick(AddProductPage.options_first_custom_field_require));
       test('should click on "ADD A CUSTOMIZAITION" button', () => client.scrollWaitForExistAndClick(AddProductPage.options_add_customization_field_button, 50));
       test('should set the second customization field "Label"', () => client.waitAndSetValue(AddProductPage.options_second_custom_field_label, data.common.personalization.perso_file.name));
       test('should select the customization field "Type" File', () => client.waitAndSelectByValue(AddProductPage.options_second_custom_field_type, '0'));
       test('should click on "ATTACH A NEW FILE" button', () => client.scrollWaitForExistAndClick(AddProductPage.options_add_new_file_button, 50));
       test('should add a file', () => client.addFile(AddProductPage.options_select_file, 'image_test.jpg'), 50);
-      test('should set the file "Title"', () => client.waitAndSetValue(AddProductPage.options_file_name, data.common.document_attach.name));
-      test('should set the file "Description" ', () => client.waitAndSetValue(AddProductPage.options_file_description, data.common.document_attach.desc));
+      test('should set the file "Title" input', () => client.waitAndSetValue(AddProductPage.options_file_name, data.common.document_attach.name));
+      test('should set the file "Description" input', () => client.waitAndSetValue(AddProductPage.options_file_description, data.common.document_attach.desc));
       test('should add the previous added file', () => client.scrollWaitForExistAndClick(AddProductPage.options_file_add_button, 50));
     }, 'product/product');
 
@@ -195,20 +206,20 @@ scenario('Create product with combination in the Back Office', client => {
       test('should check that the success alert message is well displayed', () => client.waitForExistAndClick(AddProductPage.close_validation_button));
       test('should logout successfully from the Back Office', () => client.signOutBO());
     }, 'product/product');
-}, 'product/product');
+}, 'product/product', true);
 
 scenario('Check the product creation in the Back Office', client => {
   test('should open browser', () => client.open());
   test('should log in successfully in BO', () => client.signInBO(AccessPageBO));
-  test('should go to "Catalog"', () => client.goToCatalog());
+  test('should go to "Catalog" page', () => client.goToSubtabMenuPage(Menu.Sell.Catalog.catalog_menu, Menu.Sell.Catalog.products_submenu));
   test('should search for product by name', () => client.searchProductByName(data.standard.name + 'C' + date_time));
   test('should check the existence of product name', () => client.checkTextValue(AddProductPage.catalog_product_name, data.standard.name + 'C' + date_time));
   test('should check the existence of product reference', () => client.checkTextValue(AddProductPage.catalog_product_reference, data.common.product_reference));
-  test('should check the existence of product category', () => client.checkTextValue(AddProductPage.catalog_product_category, data.standard.new_category_name + 'Combination' + date_time));
+  test('should check the existence of product category', () => client.checkTextValue(AddProductPage.catalog_product_category, data.standard.new_category_name + 'C' + date_time));
   test('should check the existence of product price TE', () => client.checkProductPriceTE(data.common.priceTE));
   test('should check the existence of product quantity Combination', () => client.checkTextValue(AddProductPage.catalog_product_quantity, (parseInt(data.standard.variations[0].quantity) + parseInt(data.standard.variations[1].quantity)).toString()));
   test('should check the existence of product status', () => client.checkTextValue(AddProductPage.catalog_product_online, 'check'));
-  test('should reset filter', () => client.waitForExistAndClick(AddProductPage.catalog_reset_filter));
+  test('should click on "Reset" button', () => client.waitForExistAndClick(AddProductPage.catalog_reset_filter));
 }, 'product/check_product', true);
 
 scenario('Check the product with combination in the Front Office', () => {
@@ -226,12 +237,16 @@ scenario('Check the product with combination in the Front Office', () => {
     test('should check that the product color is equal to "Grey"', () => client.checkTextValue(productPage.product_color, productVariations[0][1]));
     test('should set the product size to "M"', () => client.waitAndSelectByAttribute(productPage.product_size, 'title', productVariations[1][0], 3000));
     test('should check that the product color is equal to "Beige"', () => client.checkTextValue(productPage.product_color, productVariations[1][1]));
-    test('should check that the product reference is equal to "variation_1"', () => {
-      return promise
-        .then(() => client.scrollTo(productPage.product_reference))
-        .then(() => client.checkTextValue(productPage.product_reference, 'variation_2'));
-    });
     test('should check that the product quantity us equal to "20"', () => client.checkAttributeValue(productPage.product_quantity, 'data-stock', '10'));
+    test('should check that the "summary" is equal to "' + data.common.summary + '"', () => client.checkTextValue(productPage.product_summary, data.common.summary));
+    test('should check that the "description" is equal to "' + data.common.description + '"', () => client.checkTextValue(productPage.product_description, data.common.description));
+    test('should check that the product reference is equal to "' + data.common.product_reference + '"', () => {
+      return promise
+        .then(() => client.waitForExistAndClick(productPage.product_detail_tab, 2000))
+        .then(() => client.scrollTo(productPage.product_detail_tab, 180))
+        .then(() => client.pause(2000))
+        .then(() => client.checkTextValue(productPage.product_reference, data.common.product_reference));
+    });
   }, 'product/product');
   scenario('Logout from the Front Office', client => {
     test('should logout successfully from the Front Office', () => {

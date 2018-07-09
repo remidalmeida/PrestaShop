@@ -5,6 +5,7 @@ let fs = require('fs');
 let pdfUtil = require('pdf-to-text');
 
 global.tab = [];
+global.isOpen = false;
 
 class CommonClient {
   constructor() {
@@ -44,12 +45,28 @@ class CommonClient {
       .waitForExist(selector, timeout);
   }
 
-
   goToSubtabMenuPage(menuSelector, selector) {
     return this.client
-      .waitForExist(menuSelector, 90000)
-      .moveToObject(menuSelector)
-      .waitForVisibleAndClick(selector);
+      .isOpen(menuSelector)
+      .then(() => {
+        if (global.isOpen) {
+          this.client
+            .execute(function (selector) {
+              let element = document.querySelector(selector);
+              element.scrollIntoView();
+            }, selector)
+            .waitForVisibleAndClick(selector, 2000);
+        } else {
+          this.client
+            .waitForExistAndClick(menuSelector, 2000)
+            .pause(2000)
+            .execute(function (selector) {
+              let element = document.querySelector(selector);
+              element.scrollIntoView();
+            }, selector)
+            .waitForVisibleAndClick(selector);
+        }})
+      .then(()=> this.client.pause(4000));
   }
 
   closeBoarding(selector) {
@@ -62,8 +79,9 @@ class CommonClient {
     }
   }
 
-  isVisible(selector) {
+  isVisible(selector, pause = 0) {
     return this.client
+      .pause(pause)
       .isVisible(selector)
       .then((isVisible) => {
         global.isVisible = isVisible;
@@ -120,16 +138,20 @@ class CommonClient {
     return this.client.scrollTo(selector, margin);
   }
 
-  scrollWaitForExistAndClick(selector, margin, timeout = 90000) {
-    return this.client.scrollWaitForExistAndClick(selector, margin, timeout);
+  scrollWaitForExistAndClick(selector, margin, pause = 0, timeout = 90000) {
+    return this.client
+      .pause(pause)
+      .scrollWaitForExistAndClick(selector, margin, timeout);
   }
 
   waitForVisibleAndClick(selector, timeout = 90000) {
     return this.client.waitForVisibleAndClick(selector, timeout);
   }
 
-  moveToObject(selector) {
-    return this.client.moveToObject(selector);
+  moveToObject(selector, pause = 0) {
+    return this.client
+      .pause(pause)
+      .moveToObject(selector);
   }
 
   waitAndSelectByValue(selector, value, timeout = 90000) {
@@ -304,15 +326,6 @@ class CommonClient {
       .then((isExisting) => expect(isExisting).to.be.false);
   }
 
-  clickOnResumeButton(selector) {
-    if (!global.isVisible) {
-      return this.client
-        .click(selector)
-    } else {
-      return this.client.pause(1000);
-    }
-  }
-
   pause(timeout) {
     return this.client.pause(timeout);
   }
@@ -339,24 +352,6 @@ class CommonClient {
       .then((isVisible) => expect(isVisible).to.be.false);
   }
 
-  editObjectData(object) {
-    for (let key in object) {
-      if (object.hasOwnProperty(key) && key !== 'type') {
-        if (typeof object[key] === 'string') {
-          parseInt(object[key]) ? object[key] = (parseInt(object[key]) + 10).toString() : object[key] += 'update';
-        } else if (typeof object[key] === 'number') {
-          object[key] += 10;
-        } else if (typeof object[key] === 'object') {
-          this.editObjectData(object[key]);
-        }
-      }
-    }
-  }
-
-  deleteObjectElement(object, pos) {
-    delete object[pos];
-  }
-
   checkParamFromURL(param, value, pause = 0) {
     return this.client
       .pause(pause)
@@ -368,6 +363,76 @@ class CommonClient {
         expect(global.param).to.equal(value);
       });
   }
+
+  /**
+   * This function searches the data in the table in case a filter input exists
+   * @param selector
+   * @param data
+   * @returns {*}
+   */
+  search(selector, data) {
+    if (global.isVisible) {
+      return this.client
+        .waitAndSetValue(selector, data)
+        .keys('Enter');
+    }
+  }
+
+  /**
+   * This function checks the search result
+   * @param selector
+   * @param data
+   * @param pos
+   * @returns {*}
+   */
+  checkExistence(selector, data, pos) {
+    if (global.isVisible) {
+      return this.client.getText(selector.replace('%ID', pos)).then(function (text) {
+        expect(text).to.be.equal(data);
+      });
+    } else {
+      return this.client.getText(selector.replace('%ID', pos - 1)).then(function (text) {
+        expect(text).to.be.equal(data);
+      });
+    }
+  }
+
+  /**
+   * This function checks the search result
+   * @param selector editor body selector
+   * @param content
+   * @returns {*}
+   */
+  setEditorText(selector, content) {
+    return this.client
+      .pause(1000)
+      .click(selector)
+      .execute(function (content) {
+        return (tinyMCE.activeEditor.setContent(content));
+      }, content);
+  }
+
+  editObjectData(object, type = '') {
+    for (let key in object) {
+      if (object.hasOwnProperty(key) && key !== 'type') {
+        if (typeof object[key] === 'string') {
+          parseInt(object[key]) ? object[key] = (parseInt(object[key]) + 10).toString() : object[key] += 'update';
+        } else if (typeof object[key] === 'number') {
+          object[key] += 10;
+        } else if (typeof object[key] === 'object') {
+          this.editObjectData(object[key]);
+        }
+      }
+      if (type !== '') {
+        object['type'] = type;
+      }
+    }
+  }
+
+  deleteObjectElement(object, pos) {
+    delete object[pos];
+  }
+
 }
 
 module.exports = CommonClient;
