@@ -106,6 +106,8 @@
         "remidalmeida/c4w_privatesales": "dev-master",
         "remidalmeida/c4w_fakepayment": "dev-master",
         "remidalmeida/c4w_customexport": "dev-master",
+        "remidalmeida/logmanager": "dev-master",
+        "remidalmeida/pstools": "dev-master",
         "remidalmeida/prestashop-sage-theme": "dev-master",
         "sensio/distribution-bundle": "^5.0.19",
         "sensio/framework-extra-bundle": "^5.0.0",
@@ -126,6 +128,9 @@
         },
         {   "type": "composer",
             "url": "https://packages.remid.ovh/sage/"
+        },
+        {   "type": "composer",
+            "url": "https://packages.remid.ovh/vendor/"
         }
     ],
     "require-dev": {
