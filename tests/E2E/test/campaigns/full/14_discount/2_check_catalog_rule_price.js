@@ -4,7 +4,7 @@ const {productPage} = require('../../../selectors/FO/product_page');
 const {CheckoutOrderPage} = require('../../../selectors/FO/order_page');
 const commonScenarios = require('../../common_scenarios/discount');
 
-var catalogPriceRule = [{
+let catalogPriceRule = [{
   name: 'Catalog_price_1',
   type: "percentage",
   reduction: '18'
@@ -20,7 +20,7 @@ var catalogPriceRule = [{
  * http://forge.prestashop.com/browse/BOOM-3843
  **/
 
-scenario('Check double catalog price rules', client => {
+scenario('Check double catalog price rules', () => {
 
   scenario('Open the browser and connect to the BO', client => {
     test('should open the browser', () => client.open());
