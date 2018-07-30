@@ -1,6 +1,6 @@
 <?php
 /**
- * 2007-2017 PrestaShop
+ * 2007-2018 PrestaShop
  *
  * NOTICE OF LICENSE
  *
@@ -19,7 +19,7 @@
  * needs please refer to http://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2017 PrestaShop SA
+ * @copyright 2007-2018 PrestaShop SA
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
@@ -1506,7 +1506,7 @@ abstract class ModuleCore implements ModuleInterface
             }
         }
 
-        usort($module_list, create_function('$a,$b', 'return strnatcasecmp($a->displayName, $b->displayName);'));
+        usort($module_list, function ($a, $b) { return strnatcasecmp($a->displayName, $b->displayName); });
         if ($errors) {
             if (!isset(Context::getContext()->controller) && !Context::getContext()->controller->controller_name) {
                 echo '<div class="alert error"><h3>'.Context::getContext()->getTranslator()->trans('The following module(s) could not be loaded', array(), 'Admin.Modules.Notification').':</h3><ol>';
@@ -2291,7 +2291,10 @@ abstract class ModuleCore implements ModuleInterface
     protected function getCurrentSubTemplate($template, $cache_id = null, $compile_id = null)
     {
         if (!isset($this->current_subtemplate[$template.'_'.$cache_id.'_'.$compile_id])) {
-            if (false === strpos($template, 'module:')) {
+            if (false === strpos($template, 'module:') &&
+                !file_exists(_PS_ROOT_DIR_ . '/' . $template) &&
+                !file_exists($template)
+            ) {
                 $template = $this->getTemplatePath($template);
             }
 
@@ -2341,9 +2344,10 @@ abstract class ModuleCore implements ModuleInterface
     public function isCached($template, $cache_id = null, $compile_id = null)
     {
         Tools::enableCache();
-        if (false === strpos($template, 'module:')) {
+        if (false === strpos($template, 'module:') && !file_exists(_PS_ROOT_DIR_ . '/' . $template)) {
             $template = $this->getTemplatePath($template);
         }
+
         $is_cached = $this->getCurrentSubTemplate($template, $cache_id, $compile_id)->isCached($template, $cache_id, $compile_id);
         Tools::restoreCacheSettings();
         return $is_cached;
@@ -3185,7 +3189,7 @@ abstract class ModuleCore implements ModuleInterface
      */
     public function isSymfonyContext()
     {
-        return !defined('ADMIN_LEGACY_CONTEXT') && $this->context->controller instanceof AdminLegacyLayoutControllerCore;
+        return !$this->isAdminLegacyContext() && defined('_PS_ADMIN_DIR_');
     }
 
     /**
