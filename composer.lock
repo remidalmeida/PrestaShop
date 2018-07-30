@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fdbb31150f7c7c5629ee062b15dd62f4",
+    "content-hash": "327b4dcc6be1d5f685db65a7258ddd8a",
     "packages": [
         {
             "name": "analog/analog",
@@ -57,39 +57,31 @@
         },
         {
             "name": "beberlei/DoctrineExtensions",
-            "version": "v1.0.23",
+            "version": "v1.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/beberlei/DoctrineExtensions.git",
-                "reference": "dacd609f1fefb0e59054f2d09be594dfed9a46a6"
+                "reference": "51d93393ddced649da6066db233bc8e285a6588c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/beberlei/DoctrineExtensions/zipball/dacd609f1fefb0e59054f2d09be594dfed9a46a6",
-                "reference": "dacd609f1fefb0e59054f2d09be594dfed9a46a6",
+                "url": "https://api.github.com/repos/beberlei/DoctrineExtensions/zipball/51d93393ddced649da6066db233bc8e285a6588c",
+                "reference": "51d93393ddced649da6066db233bc8e285a6588c",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.2"
+                "php": ">=5.4"
             },
             "require-dev": {
-                "doctrine/orm": "~2.1",
+                "doctrine/orm": "^2.5",
+                "friendsofphp/php-cs-fixer": "^2.2.19",
                 "nesbot/carbon": "*",
-                "phpunit/phpunit": "~4.5",
-                "symfony/yaml": "~2.6",
-                "zf1/zend-date": "~1.12",
-                "zf1/zend-registry": "~1.12"
-            },
-            "suggest": {
-                "nesbot/carbon": "Alternative to DateTime",
-                "zf1/zend-date": "Alternative to DateTime"
+                "phpunit/phpunit": "^4.5",
+                "symfony/yaml": "^2.6",
+                "zf1/zend-date": "^1.12",
+                "zf1/zend-registry": "^1.12"
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.0-dev"
-                }
-            },
             "autoload": {
                 "psr-4": {
                     "DoctrineExtensions\\": "src/"
@@ -115,7 +107,7 @@
                 "doctrine",
                 "orm"
             ],
-            "time": "2018-05-28T08:54:30+00:00"
+            "time": "2018-07-14T09:31:10+00:00"
         },
         {
             "name": "composer/ca-bundle",
@@ -2514,16 +2506,16 @@
         },
         {
             "name": "paragonie/random_compat",
-            "version": "v2.0.15",
+            "version": "v2.0.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/paragonie/random_compat.git",
-                "reference": "10bcb46e8f3d365170f6de9d05245aa066b81f09"
+                "reference": "29af24f25bab834fcbb38ad2a69fa93b867e070d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/paragonie/random_compat/zipball/10bcb46e8f3d365170f6de9d05245aa066b81f09",
-                "reference": "10bcb46e8f3d365170f6de9d05245aa066b81f09",
+                "url": "https://api.github.com/repos/paragonie/random_compat/zipball/29af24f25bab834fcbb38ad2a69fa93b867e070d",
+                "reference": "29af24f25bab834fcbb38ad2a69fa93b867e070d",
                 "shasum": ""
             },
             "require": {
@@ -2559,7 +2551,7 @@
                 "pseudorandom",
                 "random"
             ],
-            "time": "2018-06-08T15:26:40+00:00"
+            "time": "2018-07-04T16:31:37+00:00"
         },
         {
             "name": "pear/archive_tar",
@@ -3168,6 +3160,38 @@
             "time": "2017-02-20T11:14:52+00:00"
         },
         {
+            "name": "prestashop/productscategory",
+            "version": "v1.8.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PrestaShop/productscategory.git",
+                "reference": "57ba1622526329afbd63058c5a5d6b5cdb657587"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PrestaShop/productscategory/zipball/57ba1622526329afbd63058c5a5d6b5cdb657587",
+                "reference": "57ba1622526329afbd63058c5a5d6b5cdb657587",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.2"
+            },
+            "type": "prestashop-module",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "AFL - Academic Free License (AFL 3.0)"
+            ],
+            "authors": [
+                {
+                    "name": "PrestaShop SA",
+                    "email": "contact@prestashop.com"
+                }
+            ],
+            "description": "PrestaShop module productscategory",
+            "homepage": "https://github.com/PrestaShop/productscategory",
+            "time": "2016-07-26T16:41:21+00:00"
+        },
+        {
             "name": "prestashop/ps_banner",
             "version": "v2.1.0",
             "source": {
@@ -3198,6 +3222,38 @@
             "description": "PrestaShop module ps_banner",
             "homepage": "https://github.com/PrestaShop/ps_banner",
             "time": "2018-02-05T21:44:48+00:00"
+        },
+        {
+            "name": "prestashop/ps_bestsellers",
+            "version": "v1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PrestaShop/ps_bestsellers.git",
+                "reference": "202054bc2f0fa320fba7a14354d5532618466245"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PrestaShop/ps_bestsellers/zipball/202054bc2f0fa320fba7a14354d5532618466245",
+                "reference": "202054bc2f0fa320fba7a14354d5532618466245",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "type": "prestashop-module",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "AFL - Academic Free License (AFL 3.0)"
+            ],
+            "authors": [
+                {
+                    "name": "PrestaShop SA",
+                    "email": "contact@prestashop.com"
+                }
+            ],
+            "description": "PrestaShop - Best Sellers",
+            "homepage": "https://github.com/PrestaShop/ps_bestsellers",
+            "time": "2016-11-15T10:30:43+00:00"
         },
         {
             "name": "prestashop/ps_categorytree",
@@ -4993,6 +5049,118 @@
             "time": "2018-06-13T15:59:06+00:00"
         },
         {
+            "name": "remidalmeida/c4w_sotracothememanager",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "git@gitlab.com:remidalmeida/prestashop-module-sotraco-manager.git",
+                "reference": "668d18f9e1dac631dc357215201d8f3d8d443f7f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://gitlab.com/api/v4/projects/remidalmeida%2Fprestashop-module-sotraco-manager/repository/archive.zip?sha=668d18f9e1dac631dc357215201d8f3d8d443f7f",
+                "reference": "668d18f9e1dac631dc357215201d8f3d8d443f7f",
+                "shasum": ""
+            },
+            "type": "prestashop-module",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Remi d'Almeida",
+                    "email": "contact@creation4web.com"
+                }
+            ],
+            "description": "Sotraco Theme Manager",
+            "homepage": "https://gitlab.com/remidalmeida/prestashop-module-sotraco-manager",
+            "time": "2018-06-25T23:12:51+00:00"
+        },
+        {
+            "name": "remidalmeida/prestashop-sotraco-theme",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "git@gitlab.com:remidalmeida/prestashop-theme-sotraco.git",
+                "reference": "419e6dc6e1a406f14dc5234f78f6b8dcb39654e2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://gitlab.com/api/v4/projects/remidalmeida%2Fprestashop-theme-sotraco/repository/archive.zip?sha=419e6dc6e1a406f14dc5234f78f6b8dcb39654e2",
+                "reference": "419e6dc6e1a406f14dc5234f78f6b8dcb39654e2",
+                "shasum": ""
+            },
+            "type": "prestashop-theme",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Remi d'Almeida",
+                    "email": "contact@creation4web.com"
+                }
+            ],
+            "description": "PrestaShop Sotraco theme",
+            "homepage": "https://gitlab.com/remidalmeida/prestashop-theme-sotraco",
+            "time": "2018-06-26T15:13:23+00:00"
+        },
+        {
+            "name": "remidalmeida/productcomments",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "git@gitlab.com:remidalmeida/prestashop-module-productcomments.git",
+                "reference": "aa7d82056a3868e587a6ab4f7f80ba9e42033828"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://gitlab.com/api/v4/projects/remidalmeida%2Fprestashop-module-productcomments/repository/archive.zip?sha=aa7d82056a3868e587a6ab4f7f80ba9e42033828",
+                "reference": "aa7d82056a3868e587a6ab4f7f80ba9e42033828",
+                "shasum": ""
+            },
+            "type": "prestashop-module",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Remi d'Almeida",
+                    "email": "contact@creation4web.com"
+                }
+            ],
+            "description": "Old product comments module for PS 1.7",
+            "homepage": "https://gitlab.com/remidalmeida/prestashop-module-productcomments",
+            "time": "2018-05-21T08:59:08+00:00"
+        },
+        {
+            "name": "remidalmeida/totloyaltyadvanced",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "git@gitlab.com:remidalmeida/prestashop-module-totloyaltyadvanced.git",
+                "reference": "918fc2e5fb8271dcf2028b131d85ac9d73779060"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://gitlab.com/api/v4/projects/remidalmeida%2Fprestashop-module-totloyaltyadvanced/repository/archive.zip?sha=918fc2e5fb8271dcf2028b131d85ac9d73779060",
+                "reference": "918fc2e5fb8271dcf2028b131d85ac9d73779060",
+                "shasum": ""
+            },
+            "type": "prestashop-module",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Remi d'Almeida",
+                    "email": "contact@creation4web.com"
+                }
+            ],
+            "description": "Loyalty and rewards",
+            "homepage": "https://gitlab.com/remidalmeida/prestashop-module-totloyaltyadvanced",
+            "time": "2018-05-21T09:03:23+00:00"
+        },
+        {
             "name": "sensio/distribution-bundle",
             "version": "v5.0.22",
             "source": {
@@ -5046,23 +5214,23 @@
         },
         {
             "name": "sensio/framework-extra-bundle",
-            "version": "v5.1.6",
+            "version": "v5.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sensiolabs/SensioFrameworkExtraBundle.git",
-                "reference": "bf4940572e43af679aaa13be98f3446a1c237bd8"
+                "reference": "50e8b7292425957b8fd66887504430c89bcbd83c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sensiolabs/SensioFrameworkExtraBundle/zipball/bf4940572e43af679aaa13be98f3446a1c237bd8",
-                "reference": "bf4940572e43af679aaa13be98f3446a1c237bd8",
+                "url": "https://api.github.com/repos/sensiolabs/SensioFrameworkExtraBundle/zipball/50e8b7292425957b8fd66887504430c89bcbd83c",
+                "reference": "50e8b7292425957b8fd66887504430c89bcbd83c",
                 "shasum": ""
             },
             "require": {
                 "doctrine/common": "^2.2",
                 "symfony/config": "^3.3|^4.0",
                 "symfony/dependency-injection": "^3.3|^4.0",
-                "symfony/framework-bundle": "^3.3|^4.0",
+                "symfony/framework-bundle": "^3.4|^4.0",
                 "symfony/http-kernel": "^3.3|^4.0"
             },
             "require-dev": {
@@ -5072,6 +5240,8 @@
                 "symfony/dom-crawler": "^3.3|^4.0",
                 "symfony/expression-language": "^3.3|^4.0",
                 "symfony/finder": "^3.3|^4.0",
+                "symfony/monolog-bridge": "^3.0|^4.0",
+                "symfony/monolog-bundle": "^3.2",
                 "symfony/phpunit-bridge": "^3.3|^4.0",
                 "symfony/psr-http-message-bridge": "^0.3",
                 "symfony/security-bundle": "^3.3|^4.0",
@@ -5088,7 +5258,7 @@
             "type": "symfony-bundle",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "5.1.x-dev"
+                    "dev-master": "5.2.x-dev"
                 }
             },
             "autoload": {
@@ -5111,7 +5281,7 @@
                 "annotations",
                 "controllers"
             ],
-            "time": "2018-02-14T08:40:54+00:00"
+            "time": "2018-05-12T09:37:42+00:00"
         },
         {
             "name": "sensiolabs/security-checker",
@@ -5253,16 +5423,16 @@
         },
         {
             "name": "swiftmailer/swiftmailer",
-            "version": "v5.4.9",
+            "version": "v5.4.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/swiftmailer/swiftmailer.git",
-                "reference": "7ffc1ea296ed14bf8260b6ef11b80208dbadba91"
+                "reference": "dd71cc1638ed7aebbb33f2e2b0edd2cf6ea73d97"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/swiftmailer/swiftmailer/zipball/7ffc1ea296ed14bf8260b6ef11b80208dbadba91",
-                "reference": "7ffc1ea296ed14bf8260b6ef11b80208dbadba91",
+                "url": "https://api.github.com/repos/swiftmailer/swiftmailer/zipball/dd71cc1638ed7aebbb33f2e2b0edd2cf6ea73d97",
+                "reference": "dd71cc1638ed7aebbb33f2e2b0edd2cf6ea73d97",
                 "shasum": ""
             },
             "require": {
@@ -5303,7 +5473,7 @@
                 "mail",
                 "mailer"
             ],
-            "time": "2018-01-23T07:37:21+00:00"
+            "time": "2018-07-27T08:58:59+00:00"
         },
         {
             "name": "symfony/monolog-bundle",
@@ -5824,16 +5994,16 @@
         },
         {
             "name": "symfony/symfony",
-            "version": "v3.4.12",
+            "version": "v3.4.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/symfony.git",
-                "reference": "c36f8cb21b5f1661a14fdb8cef9cc611d54a3494"
+                "reference": "c406c5a4f11fc00b60d3ec585125350418c4568d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/c36f8cb21b5f1661a14fdb8cef9cc611d54a3494",
-                "reference": "c36f8cb21b5f1661a14fdb8cef9cc611d54a3494",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/c406c5a4f11fc00b60d3ec585125350418c4568d",
+                "reference": "c406c5a4f11fc00b60d3ec585125350418c4568d",
                 "shasum": ""
             },
             "require": {
@@ -5856,7 +6026,7 @@
             },
             "conflict": {
                 "phpdocumentor/reflection-docblock": "<3.0||>=3.2.0,<3.2.2",
-                "phpdocumentor/type-resolver": "<0.2.1",
+                "phpdocumentor/type-resolver": "<0.3.0",
                 "phpunit/phpunit": "<4.8.35|<5.4.3,>=5.0"
             },
             "provide": {
@@ -5925,7 +6095,7 @@
                 "doctrine/data-fixtures": "1.0.*",
                 "doctrine/dbal": "~2.4",
                 "doctrine/doctrine-bundle": "~1.4",
-                "doctrine/orm": "~2.4,>=2.4.5",
+                "doctrine/orm": "~2.4,>=2.4.5,<=2.7.0",
                 "egulias/email-validator": "~1.2,>=1.2.8|~2.0",
                 "monolog/monolog": "~1.11",
                 "ocramius/proxy-manager": "~0.4|~1.0|~2.0",
@@ -5975,7 +6145,7 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2018-06-25T12:29:33+00:00"
+            "time": "2018-07-23T16:37:45+00:00"
         },
         {
             "name": "tecnickcom/tcpdf",
@@ -6041,20 +6211,21 @@
         },
         {
             "name": "twig/twig",
-            "version": "v1.35.3",
+            "version": "v1.35.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "b48680b6eb7d16b5025b9bfc4108d86f6b8af86f"
+                "reference": "7e081e98378a1e78c29cc9eba4aefa5d78a05d2a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/b48680b6eb7d16b5025b9bfc4108d86f6b8af86f",
-                "reference": "b48680b6eb7d16b5025b9bfc4108d86f6b8af86f",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/7e081e98378a1e78c29cc9eba4aefa5d78a05d2a",
+                "reference": "7e081e98378a1e78c29cc9eba4aefa5d78a05d2a",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.3"
+                "php": ">=5.3.3",
+                "symfony/polyfill-ctype": "^1.8"
             },
             "require-dev": {
                 "psr/container": "^1.0",
@@ -6093,16 +6264,16 @@
                 },
                 {
                     "name": "Twig Team",
-                    "homepage": "http://twig.sensiolabs.org/contributors",
+                    "homepage": "https://twig.symfony.com/contributors",
                     "role": "Contributors"
                 }
             ],
             "description": "Twig, the flexible, fast, and secure template language for PHP",
-            "homepage": "http://twig.sensiolabs.org",
+            "homepage": "https://twig.symfony.com",
             "keywords": [
                 "templating"
             ],
-            "time": "2018-03-20T04:25:58+00:00"
+            "time": "2018-07-13T07:12:17+00:00"
         }
     ],
     "packages-dev": [
@@ -7381,16 +7552,16 @@
         },
         {
             "name": "symfony/phpunit-bridge",
-            "version": "v3.4.12",
+            "version": "v3.4.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/phpunit-bridge.git",
-                "reference": "8a21eb6bedad38bf1f15d529c65eb9e17d0242fd"
+                "reference": "62c8349f21927b9a5975d89ee065e84d233a34e5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/phpunit-bridge/zipball/8a21eb6bedad38bf1f15d529c65eb9e17d0242fd",
-                "reference": "8a21eb6bedad38bf1f15d529c65eb9e17d0242fd",
+                "url": "https://api.github.com/repos/symfony/phpunit-bridge/zipball/62c8349f21927b9a5975d89ee065e84d233a34e5",
+                "reference": "62c8349f21927b9a5975d89ee065e84d233a34e5",
                 "shasum": ""
             },
             "require": {
@@ -7443,7 +7614,7 @@
             ],
             "description": "Symfony PHPUnit Bridge",
             "homepage": "https://symfony.com",
-            "time": "2018-06-10T07:25:02+00:00"
+            "time": "2018-07-05T11:53:23+00:00"
         },
         {
             "name": "webmozart/assert",
@@ -7500,6 +7671,10 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "cssjanus/cssjanus": 20,
+        "remidalmeida/productcomments": 20,
+        "remidalmeida/totloyaltyadvanced": 20,
+        "remidalmeida/c4w_sotracothememanager": 20,
+        "remidalmeida/prestashop-sotraco-theme": 20,
         "phake/phake": 0
     },
     "prefer-stable": false,

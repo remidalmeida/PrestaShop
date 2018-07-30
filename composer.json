@@ -94,7 +94,7 @@
         "remidalmeida/productcomments": "dev-master",
         "remidalmeida/totloyaltyadvanced": "dev-master",
         "remidalmeida/c4w_sotracothememanager": "dev-master",
-        "remidalmeida/prestashop-sotraco-theme": "dev-master"
+        "remidalmeida/prestashop-sotraco-theme": "dev-master",
         "prestashop/translationtools-bundle": "~2.0",
         "prestashop/welcome": "^5",
         "sensio/distribution-bundle": "^5.0.19",
@@ -106,6 +106,7 @@
         "symfony/polyfill-apcu": "^1.0",
         "symfony/swiftmailer-bundle": "^2.6.4",
         "symfony/symfony": ">=3.4.8",
+	"systempay/systempay": "dev-master",
         "tecnickcom/tcpdf": "^6.2.12",
         "twig/twig": "^1.0||^2.0"
     },
