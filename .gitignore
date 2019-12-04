@@ -10,6 +10,7 @@ download/*
 !/log/index.php
 /upload/*
 vendor/*
+install-dev/*
 docs/phpdoc-sf/
 composer.lock
 tests/Selenium/errorShots/
