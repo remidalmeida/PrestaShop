@@ -2,13 +2,11 @@ var CommonClient = require('./common_client');
 
 class Discount extends CommonClient {
 
-  searchByName(inputSelector, buttonSelector, catalogPriceRulesName) {
+  searchByName(inputSelector, buttonSelector, name) {
     if (isVisible) {
       return this.client
-        .waitAndSetValue(inputSelector, catalogPriceRulesName)
-        .waitForExistAndClick(buttonSelector)
-    } else {
-      return this.client.pause(1000)
+        .waitAndSetValue(inputSelector, name)
+        .waitForExistAndClick(buttonSelector);
     }
   }
 
@@ -24,13 +22,14 @@ class Discount extends CommonClient {
       .waitAndSetValue(selectorInput, value)
       .pause(2000)
       .keys('ArrowDown')
-      .waitForVisibleAndClick(selectorOption)
+      .waitForVisibleAndClick(selectorOption);
   }
 
   setPromoCode(selectorInput, selectorButton, value) {
     return this.client
-      .waitAndSetValue(selectorInput, tab[value])
-      .waitForExistAndClick(selectorButton)
+      .waitForVisible(selectorInput)
+      .waitAndSetValue(selectorInput, tab[value], 2000)
+      .waitForExistAndClick(selectorButton, 2000);
   }
 
   checkTotalPrice(selector, option = 'percent') {
@@ -38,12 +37,12 @@ class Discount extends CommonClient {
       .pause(2000)
       .then(() => this.client.getText(selector))
       .then((code) => {
-        if(option === 'amount') {
-          expect(code.split('€')[1]).to.be.equal((tab["totalProducts"].split('€')[1] - 24) * 0.5 )
+        if (option === 'amount') {
+          expect(code.split('€')[1]).to.be.equal(((tab["totalProducts"].split('€')[1] * 0.5) - 24).toPrecision(4).toString());
         } else {
-          expect(code.split('€')[1]).to.be.equal((tab["totalProducts"].split('€')[1] * 0.5) * 0.5 )
+          expect(code.split('€')[1]).to.be.equal(((tab["totalProducts"].split('€')[1] * 0.5) * 0.5).toPrecision(4).toString());
         }
-      })
+      });
   }
 }
 

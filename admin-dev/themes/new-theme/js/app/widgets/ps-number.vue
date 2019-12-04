@@ -1,5 +1,5 @@
 <!--**
- * 2007-2017 PrestaShop
+ * 2007-2019 PrestaShop and Contributors
  *
  * NOTICE OF LICENSE
  *
@@ -15,26 +15,27 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2017 PrestaShop SA
+ * @copyright 2007-2019 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  *-->
 
  <template>
-  <div class="ps-number">
+  <div class="ps-number" :class="{'hover-buttons': hoverButtons}">
     <input
       type="number"
-      class="ps-number form-control"
-      :class="{'danger' : danger}"
+      class="form-control"
+      :class="{'danger': danger}"
       :value="value"
+      placeholder="0"
       @keyup="onKeyup($event)"
       @focus="focusIn"
-      @blur="focusOut($event)"
+      @blur.native="focusOut($event)"
     />
-    <div class="ps-number-button d-flex" v-if="buttons">
+    <div class="ps-number-spinner d-flex" v-if="buttons">
       <span class="ps-number-up" @click="increment"></span>
       <span class="ps-number-down" @click="decrement"></span>
     </div>
@@ -44,9 +45,10 @@
 <script>
   export default {
     props: {
-      value: 0,
+      value: '',
       danger: false,
       buttons: false,
+      hoverButtons: false,
     },
     methods: {
       onKeyup($event) {
@@ -59,7 +61,7 @@
         this.$emit('blur', $event);
       },
       increment() {
-        const value = parseInt(this.value, 10);
+        const value = parseInt(this.value === '' ? 0 : this.value, 10);
         this.$emit('change', isNaN(value) ? 0 : value + 1);
       },
       decrement() {

@@ -1,6 +1,6 @@
 <?php
 /**
- * 2007-2017 PrestaShop
+ * 2007-2019 PrestaShop and Contributors
  *
  * NOTICE OF LICENSE
  *
@@ -16,23 +16,30 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2017 PrestaShop SA
+ * @copyright 2007-2019 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
 
-use Doctrine\DBAL\Configuration;
-use Doctrine\DBAL\DriverManager;
-use Symfony\Component\Yaml\Yaml;
-use Symfony\Component\HttpKernel\Kernel;
-use PrestaShopBundle\Kernel\ModuleRepository;
+use PrestaShopBundle\Kernel\ModuleRepositoryFactory;
 use Symfony\Component\Config\Loader\LoaderInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HttpKernel\Kernel;
 
 class AppKernel extends Kernel
 {
+    const VERSION = '1.7.6.2';
+    const MAJOR_VERSION_STRING = '1.7';
+    const MAJOR_VERSION = 17;
+    const MINOR_VERSION = 6;
+    const RELEASE_VERSION = 2;
+
+    /**
+     * @{inheritdoc}
+     */
     public function registerBundles()
     {
         $bundles = array(
@@ -47,23 +54,28 @@ class AppKernel extends Kernel
             new PrestaShopBundle\PrestaShopBundle(),
             // PrestaShop Translation parser
             new PrestaShop\TranslationToolsBundle\TranslationToolsBundle(),
-            // Api consumer
+            // REST API consumer
             new Csa\Bundle\GuzzleBundle\CsaGuzzleBundle(),
+            new League\Tactician\Bundle\TacticianBundle(),
         );
 
-        if (in_array($this->getEnvironment(), array('dev', 'test'))) {
+        if (in_array($this->getEnvironment(), array('dev', 'test'), true)) {
             $bundles[] = new Symfony\Bundle\DebugBundle\DebugBundle();
             $bundles[] = new Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
             $bundles[] = new Sensio\Bundle\DistributionBundle\SensioDistributionBundle();
         }
 
-        /**
-         * @see https://symfony.com/doc/2.8/configuration/external_parameters.html#environment-variables
-         */
-        if (extension_loaded('apc')) {
-            $_SERVER['SYMFONY__CACHE__DRIVER'] = 'apc';
-        } else {
-            $_SERVER['SYMFONY__CACHE__DRIVER'] = 'array';
+        if ('dev' === $this->getEnvironment()) {
+            $bundles[] = new Symfony\Bundle\WebServerBundle\WebServerBundle();
+        }
+
+        /* Will not work until PrestaShop is installed */
+        $activeModules = $this->getActiveModules();
+        if (!empty($activeModules)) {
+            try {
+                $this->enableComposerAutoloaderOnModules($activeModules);
+            } catch (\Exception $e) {
+            }
         }
 
         return $bundles;
@@ -76,28 +88,48 @@ class AppKernel extends Kernel
     {
         $kernelParameters = parent::getKernelParameters();
 
-        $activeModules = array();
-
-        if ($this->parametersFileExists()) {
-            try {
-                $this->getConnection()->connect();
-                $activeModules = $this->getActiveModules();
-            } catch (\Exception $e) {
-            }
-        }
-
-
         return array_merge(
             $kernelParameters,
-            array('kernel.active_modules' => $activeModules)
+            array('kernel.active_modules' => $this->getActiveModules())
         );
     }
 
     /**
      * @{inheritdoc}
      */
+    public function getRootDir()
+    {
+        return __DIR__;
+    }
+
+    /**
+     * @{inheritdoc}
+     */
+    public function getCacheDir()
+    {
+        return dirname(__DIR__).'/var/cache/'.$this->getEnvironment();
+    }
+
+    /**
+     * @{inheritdoc}
+     */
+    public function getLogDir()
+    {
+        return dirname(__DIR__).'/var/logs';
+    }
+
+    /**
+     * @{inheritdoc}
+     * @throws \Exception
+     */
     public function registerContainerConfiguration(LoaderInterface $loader)
     {
+        $loader->load(function (ContainerBuilder $container) {
+            $container->setParameter('container.autowiring.strict_mode', true);
+            $container->setParameter('container.dumper.inline_class_loader', false);
+            $container->addObjectResource($this);
+        });
+
         $loader->load($this->getRootDir().'/config/config_'.$this->getEnvironment().'.yml');
     }
 
@@ -108,61 +140,50 @@ class AppKernel extends Kernel
      */
     private function getActiveModules()
     {
-        $databasePrefix = $this->getParameters()['database_prefix'];
-
-        $modulesRepository = new ModuleRepository(
-            $this->getConnection(),
-            $databasePrefix
-        );
-
-        return $modulesRepository->getActiveModules();
-    }
-
-    /**
-     * @return array The root parameters of PrestaShop
-     */
-    private function getParameters()
-    {
-        if ($this->parametersFileExists()) {
-            $config = require($this->getParametersFile());
-
-            return $config['parameters'];
+        $activeModules = [];
+        try {
+            if ($modulesRepository = ModuleRepositoryFactory::getInstance()->getRepository()) {
+                $activeModules = $modulesRepository->getActiveModules();
+            }
+        } catch (\Exception $e) {
+            //Do nothing because the modules retrieval must not block the kernel, and it won't work
+            //during the installation process
         }
 
-        return array();
+
+        return $activeModules;
     }
 
     /**
-     * @var bool
+     * Enable auto loading of module Composer autoloader if needed.
+     * Need to be done as earlier as possible in application lifecycle.
+     *
+     * Note: this feature is also manage in PrestaShop\PrestaShop\Adapter\ContainerBuilder
+     * for non Symfony environments.
+     *
+     * @param array $modules the list of modules
      */
-    private function parametersFileExists()
+    private function enableComposerAutoloaderOnModules($modules)
     {
-        return file_exists($this->getParametersFile());
+        foreach ($modules as $module) {
+            $autoloader = __DIR__.'/../modules/'.$module.'/vendor/autoload.php';
+
+            if (file_exists($autoloader)) {
+                include_once $autoloader;
+            }
+        }
     }
 
     /**
-     * @return string filepath to PrestaShop configuration parameters
+     * Gets the application root dir.
+     * Override Kernel due to the fact that we remove the composer.json in
+     * downloaded package. More we are not a framework and the root directory
+     * should always be the parent of this file.
+     *
+     * @return string The project root dir
      */
-    private function getParametersFile()
+    public function getProjectDir()
     {
-        return $this->getRootDir().'/config/parameters.php';
-    }
-
-    /**
-     * @return \Doctrine\DBAL\Connection
-     */
-    private function getConnection()
-    {
-        $parameters = $this->getParameters();
-
-        return DriverManager::getConnection(array(
-            'dbname' => $parameters['database_name'],
-            'user' => $parameters['database_user'],
-            'password' => $parameters['database_password'],
-            'host' => $parameters['database_host'],
-            'port' => $parameters['database_port'],
-            'charset' => 'utf8',
-            'driver' => 'pdo_mysql',
-        ));
+        return realpath(__DIR__ . '/..');
     }
 }

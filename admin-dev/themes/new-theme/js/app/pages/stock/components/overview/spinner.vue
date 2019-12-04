@@ -1,5 +1,5 @@
 <!--**
- * 2007-2017 PrestaShop
+ * 2007-2019 PrestaShop and Contributors
  *
  * NOTICE OF LICENSE
  *
@@ -15,16 +15,16 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2017 PrestaShop SA
+ * @copyright 2007-2019 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  *-->
 <template>
   <form
-    class="qty text-sm-right"
+    class="qty"
     :class="classObject"
     @mouseover="focusIn"
     @mouseleave="focusOut($event)"
@@ -36,8 +36,9 @@
       placeholder="0"
       pattern="\d*"
       step="1"
+      buttons="true"
+      hoverButtons="true"
       :value="qty"
-      :buttons="this.isActive"
       @change="onChange"
       @keyup="onKeyup($event)"
       @focus="focusIn"
@@ -51,13 +52,16 @@
 
 <script>
   import PSNumber from 'app/widgets/ps-number';
+
+  const $ = global.$;
+
   export default {
     props: ['product'],
     computed: {
       qty() {
         if (!this.product.qty) {
           this.isEnabled = false;
-          this.value = 0;
+          this.value = '';
         }
         return this.product.qty;
       },
@@ -96,7 +100,8 @@
         this.isActive = true;
       },
       focusOut(event) {
-        if (!$(event.target).hasClass('ps-number') && !this.value) {
+        const value = parseInt(this.value, 10);
+        if (!$(event.target).hasClass('ps-number') && (isNaN(value) || value === 0)) {
           this.isActive = false;
         }
         this.isEnabled = !!this.value;
@@ -131,7 +136,7 @@
   };
 </script>
 
-<style lang="sass" type="text/scss" scoped>
+<style lang="scss" type="text/scss" scoped>
   @import "~jquery-ui-dist/jquery-ui.css";
   *{
     outline: none;

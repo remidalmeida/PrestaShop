@@ -1,80 +1,54 @@
-﻿
-.rtl-flip:not(.rtl-no-flip) {
-  -moz-transform: scaleX(-1);
-  -o-transform: scaleX(-1);
-  -webkit-transform: scaleX(-1);
-  transform: scaleX(-1);
-  -ms-transform: scale(-1, 1);
-  filter: FlipH;
-  -ms-filter: "FlipH";
+.sidebar.sidebar-right {
+  -webkit-transform: translate(-100%, 0);
+  -moz-transform: translate(-100%, 0);
+  -ms-transform: translate(-100%, 0);
+  -o-transform: translate(-100%, 0);
+  transform: translate(-100%, 0);
 }
 
-i[class*="right"], i[class*="left"], i[class*="backward"], i[class*="forward"] {
-  -moz-transform: scale(-1, 1);
-  -webkit-transform: scale(-1, 1);
-  -o-transform: scale(-1, 1);
-  -ms-transform: scale(-1, 1);
-  transform: scale(-1, 1);
-  filter: FlipH;
-  -ms-filter: "FlipH";
+/* fix logo position */
+.main-header > .logo {
+  background-position: right;
 }
 
-.magnitude:before {
-  content: "?";
-  opacity: 0;
+/* fix profile menu position */
+.employee-dropdown .dropdown-menu {
+  right: auto !important;
+  left: .3em !important;
 }
 
-.dropdown-menu, .mce-window {
-  right: auto;
-}
-
-ul.category-tree .category-label .category {
-  left: 9px;
-}
-
-.adminproducts .dz-hidden-input {
-  display: none;
-}
-
-ul.category-tree .more::before {
-  content: "\E5CB";
-}
-
-.product-page .product-header {
-  overflow: hidden;
-}
-
+/* fix select dropdown */
 .select2-container--open .select2-dropdown {
   right: auto;
   left: 0;
 }
 
-.collapse-button[data-v-442d0f8a], #search .search-input {
-  text-align: right;
-}
-
-.ui-datepicker-rtl {
+/* fix notification dropdown */
+.notification-center .dropdown-menu {
   right: auto;
+  left: 85px !important;
 }
 
-svg {
-  direction: ltr
-}
-
-.mce-panel {
+/* fix popover */
+.popover {
   right: auto;
+  left: 5px;
+  margin-right: 0;
+  margin-left: 8px;
+}
+.popover .arrow {
+  left: -8px;
+  right: auto;
+  transform: scaleX(-1);
 }
 
-.sidebar.sidebar-right {
-  -webkit-transform: translate(-100%,0);
-  -moz-transform: translate(-100%,0);
-  -ms-transform: translate(-100%,0);
-  -o-transform: translate(-100%,0);
-  transform: translate(-100%,0);
+/* fix stock quantity arrow direction */
+.stock-app .stock-overview .table .qty-update .material-icons {
+  transform: scaleX(-1);
 }
 
-.employee-dropdown .dropdown-menu {
-  right: auto !important;
-  left: 4.8px!important;
-  left: .3rem!important;
+/* Fixes image flipping for RTL language */
+.img-rtl {
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
 }

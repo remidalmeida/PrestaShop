@@ -1,5 +1,5 @@
 /**
- * 2007-2017 PrestaShop
+ * 2007-2019 PrestaShop and Contributors
  *
  * NOTICE OF LICENSE
  *
@@ -15,16 +15,16 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2017 PrestaShop SA
+ * @copyright 2007-2019 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
 function sendSearchQuery() {
 	pattern = $('#addons-search-box').val();
-	url = 'http://addons.prestashop.com/en/search.php?search_query='+pattern+'&amp;utm_source=back-office&amp;utm_medium=recherche-theme&amp;utm_campaign=back-office-EN';
+	url = 'https://addons.prestashop.com/en/search.php?search_query='+pattern+'&amp;utm_source=back-office&amp;utm_medium=recherche-theme&amp;utm_campaign=back-office-EN';
 	window.open(url, '_blank');
 }
 
@@ -101,7 +101,7 @@ $(document).ready(function() {
 			$("#addons-search-results").remove();
 			ajaxSearch = $.ajax({
 				type: 'POST',
-				url: 'http://addons.prestashop.com/search.php',
+				url: 'https://addons.prestashop.com/search.php',
 				crossDomain: true,
 				dataType:'jsonp',
 				data: {

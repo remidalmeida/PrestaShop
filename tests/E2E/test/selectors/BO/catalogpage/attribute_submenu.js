@@ -8,18 +8,24 @@ module.exports = {
     save_button: '//*[@id="attribute_group_form_submit_btn"]',
     search_input: '//*[@id="table-attribute_group"]/thead/tr[2]/th[3]/input',
     search_button: '//*[@id="submitFilterButtonattribute_group"]',
-    selected_attribute: '//*[@id="table-attribute_group"]/tbody/tr/td[3]',
+    attribute_name: '//*[@id="table-attribute_group"]/tbody/tr/td[3]',
     add_value_button: '//*[@id="page-header-desc-attribute-new_value"]',
-    save_and_add: '//*[@id="fieldset_0"]/div[3]/button[2]',
+    save_and_add_button: '//*[@id="fieldset_0"]/div[3]/button[2]',
     save_value_button: '//*[@id="attribute_form_submit_btn"]',
     value_input: '//*[@id="name_1"]',
-    value_action_group_button: '//*[@id="table-attribute"]/tbody/tr[1]/td[5]/div/div/button',
-    delete_value_button: '//*[@id="table-attribute"]/tbody/tr[1]/td[5]/div/div/ul/li/a',
-    group_action_button: '//*[@id="table-attribute_group"]/tbody/tr/td[6]/div/div/button',
-    delete_attribute_button: '//*[@id="table-attribute_group"]/tbody/tr/td[6]/div/div/ul/li[3]/a',
-    update_button: '//*[@id="table-attribute_group"]/tbody/tr/td[6]/div/div/ul/li[1]/a',
+    value_action_group_button: '(//*[@id="table-attribute"]//div[contains(@class, "btn-group")]/button)[1]',
+    delete_value_button: '(//*[@id="table-attribute"]//a[@class="delete"])[1]',
+    group_action_button: '//*[@id="table-attribute_group"]//button[@data-toggle="dropdown"]',
+    delete_attribute_button: '//*[@id="table-attribute_group"]//a[@class="delete"]',
+    update_button: '//*[@id="table-attribute_group"]//a[@class="edit"]',
     update_value_button: '(//*[@id="table-attribute"]//a[@title="Edit"])[%POS]',
-    reset_button: '//*[@id="table-attribute_group"]//button[@name="submitResetattribute_group"]'
+    reset_button: '//*[@id="table-attribute_group"]//button[@name="submitResetattribute_group"]',
+    attribute_checkbox: '//*[@id="table-attribute_group"]//input[@type="checkbox"]',
+    bulk_actions_button: '//*[@id="bulk_action_menu_attribute_group"]',
+    delete_bulk_action_button: '//*[@id="form-attribute_group"]//div[contains(@class,"bulk-actions")]//li[4]/a',
+    attribute_id: '//*[@id="table-attribute_group"]/tbody/tr/td[2]',
+    color_input: '//*[@id="color_0"]',
+    texture_input_file: '//*[@id="texture"]'
   }
 
 };

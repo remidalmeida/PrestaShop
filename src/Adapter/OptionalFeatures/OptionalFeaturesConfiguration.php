@@ -1,6 +1,6 @@
 <?php
 /**
- * 2007-2017 PrestaShop
+ * 2007-2019 PrestaShop and Contributors
  *
  * NOTICE OF LICENSE
  *
@@ -16,17 +16,16 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2017 PrestaShop SA
+ * @copyright 2007-2019 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
 
 namespace PrestaShop\PrestaShop\Adapter\OptionalFeatures;
 
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use PrestaShop\PrestaShop\Adapter\Configuration;
 use PrestaShop\PrestaShop\Adapter\Feature\CombinationFeature;
 use PrestaShop\PrestaShop\Adapter\Feature\FeatureFeature;
@@ -34,7 +33,7 @@ use PrestaShop\PrestaShop\Adapter\Feature\GroupFeature;
 use PrestaShop\PrestaShop\Core\Configuration\DataConfigurationInterface;
 
 /**
- * This class will provide Optional features configuration for a Shop
+ * This class will provide Optional features configuration for a Shop.
  */
 class OptionalFeaturesConfiguration implements DataConfigurationInterface
 {
@@ -63,8 +62,7 @@ class OptionalFeaturesConfiguration implements DataConfigurationInterface
         CombinationFeature $combinationFeature,
         FeatureFeature $featureFeature,
         GroupFeature $groupFeature
-    )
-    {
+    ) {
         $this->configuration = $configuration;
         $this->combinationFeature = $combinationFeature;
         $this->featureFeature = $featureFeature;
@@ -72,7 +70,7 @@ class OptionalFeaturesConfiguration implements DataConfigurationInterface
     }
 
     /**
-     * @{inheritdoc}
+     * {@inheritdoc}
      */
     public function getConfiguration()
     {
@@ -84,7 +82,7 @@ class OptionalFeaturesConfiguration implements DataConfigurationInterface
     }
 
     /**
-     * @{inheritdoc}
+     * {@inheritdoc}
      */
     public function updateConfiguration(array $configuration)
     {
@@ -98,20 +96,14 @@ class OptionalFeaturesConfiguration implements DataConfigurationInterface
     }
 
     /**
-     * @{inheritdoc}
+     * {@inheritdoc}
      */
     public function validateConfiguration(array $configuration)
     {
-        $resolver = new OptionsResolver();
-        $resolver->setRequired(
-            array(
-                'combinations',
-                'features',
-                'customer_groups',
-            )
+        return isset(
+            $configuration['combinations'],
+            $configuration['features'],
+            $configuration['customer_groups']
         );
-        $resolver->resolve($configuration);
-
-        return true;
     }
 }

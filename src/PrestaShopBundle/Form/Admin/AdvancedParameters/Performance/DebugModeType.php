@@ -1,6 +1,6 @@
 <?php
 /**
- * 2007-2017 PrestaShop
+ * 2007-2019 PrestaShop and Contributors
  *
  * NOTICE OF LICENSE
  *
@@ -16,21 +16,23 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2017 PrestaShop SA
+ * @copyright 2007-2019 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
+
 namespace PrestaShopBundle\Form\Admin\AdvancedParameters\Performance;
 
 use PrestaShopBundle\Form\Admin\Type\CommonAbstractType;
+use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
- * This form class generates the "Debug mode" form in Performance page
+ * This form class generates the "Debug mode" form in Performance page.
  */
 class DebugModeType extends CommonAbstractType
 {
@@ -40,31 +42,15 @@ class DebugModeType extends CommonAbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('disable_non_native_modules', 'Symfony\Component\Form\Extension\Core\Type\ChoiceType', array(
-                'choices'  => array(
-                    false => 'No',
-                    true => 'Yes',
-                ),
-                'choice_translation_domain' => 'Admin.Global',
+            ->add('disable_non_native_modules', SwitchType::class, [
                 'required' => true,
-            ))
-            ->add('disable_overrides', 'Symfony\Component\Form\Extension\Core\Type\ChoiceType', array(
-                'choices'  => array(
-                    false => 'No',
-                    true => 'Yes',
-                ),
-                'choice_translation_domain' => 'Admin.Global',
+            ])
+            ->add('disable_overrides', SwitchType::class, [
                 'required' => true,
-            ))
-            ->add('debug_mode', 'Symfony\Component\Form\Extension\Core\Type\ChoiceType', array(
-                'choices'  => array(
-                    false => 'No',
-                    true => 'Yes',
-                ),
-                'choice_translation_domain' => 'Admin.Global',
+            ])
+            ->add('debug_mode', SwitchType::class, [
                 'required' => true,
-            ))
-        ;
+            ]);
     }
 
     /**
@@ -72,9 +58,9 @@ class DebugModeType extends CommonAbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
-            'translation_domain' => 'Admin.Advparameters.Feature'
-        ));
+        $resolver->setDefaults([
+            'translation_domain' => 'Admin.Advparameters.Feature',
+        ]);
     }
 
     /**
