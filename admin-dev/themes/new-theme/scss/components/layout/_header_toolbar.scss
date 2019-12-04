@@ -4,10 +4,14 @@
   top: $size-header-height;
   left: $size-navbar-width;
   right: 0;
-  z-index: 501;
+  z-index: 990; // popup menus' z-index is 1000, so it has to be just below that
   border-bottom: 0.0625rem solid $color-separator;
 
   transition: left .5s ease; // transition when collapsing the nav menu
+
+  .mobile & {
+    top: $size-header-height + ($header-mobile-padding-y * 2);
+  }
 
   @include media-breakpoint-down(md) {
     left: 0;
@@ -75,13 +79,18 @@
   }
 
   .tab {
+    position: relative;
+
     .notification-container {
-      @include notification_container(1.5rem);
+      @include notification_container(1.5rem)
+      position: absolute;
+      bottom: -5px;
+      right: 15px;
 
       .notification-counter {
         @include notification_counter();
-        top: -0.063rem;
-        right: initial;
+        top: -1.75rem;
+        right: -0.9375rem;
       }
     }
   }

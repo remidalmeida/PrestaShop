@@ -1,6 +1,6 @@
 <?php
 /**
- * 2007-2018 PrestaShop
+ * 2007-2018 PrestaShop.
  *
  * NOTICE OF LICENSE
  *
@@ -28,26 +28,28 @@ namespace PrestaShopBundle\Controller\Admin\Configure\AdvancedParameters;
 
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use PrestaShopBundle\Security\Voter\PageVoter;
+use PrestaShopBundle\Security\Annotation\AdminSecurity;
+use PrestaShopBundle\Security\Annotation\DemoRestricted;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Responsible of "Configure > Advanced Parameters > Administration" page display
+ * Responsible of "Configure > Advanced Parameters > Administration" page display.
  */
 class AdministrationController extends FrameworkBundleAdminController
 {
     const CONTROLLER_NAME = 'AdminAdminPreferences';
 
     /**
-     * Show administration page
+     * Show Administration page.
      *
      * @Template("@PrestaShop/Admin/Configure/AdvancedParameters/administration.html.twig")
+     * @AdminSecurity("is_granted('read', request.get('_legacy_controller'))", message="Access denied.")
      *
      * @param FormInterface $form
      *
-     * @return array
+     * @return Response
      */
     public function indexAction(FormInterface $form = null)
     {
@@ -55,7 +57,7 @@ class AdministrationController extends FrameworkBundleAdminController
 
         return [
             'layoutHeaderToolbarBtn' => [],
-            'layoutTitle' => $this->trans('Administration','Admin.Navigation.Menu'),
+            'layoutTitle' => $this->trans('Administration', 'Admin.Navigation.Menu'),
             'requireAddonsSearch' => true,
             'requireBulkActions' => false,
             'showContentHeader' => true,
@@ -67,7 +69,10 @@ class AdministrationController extends FrameworkBundleAdminController
     }
 
     /**
-     * Process administration page form
+     * Process the Administration configuration form.
+     *
+     * @AdminSecurity("is_granted(['read', 'update', 'create', 'delete'], request.get('_legacy_controller'))", message="You do not have permission to update this.", redirectRoute="admin_administration")
+     * @DemoRestricted(redirectRoute="admin_administration")
      *
      * @param Request $request
      *
@@ -75,29 +80,10 @@ class AdministrationController extends FrameworkBundleAdminController
      */
     public function processFormAction(Request $request)
     {
-        if ($this->isDemoModeEnabled()) {
-            $this->addFlash('error', $this->getDemoModeErrorMessage());
+        $this->dispatchHook('actionAdminAdminPreferencesControllerPostProcessBefore', array('controller' => $this));
 
-            return $this->redirectToRoute('admin_administration');
-        }
-
-        $this->dispatchHook('actionAdminAdminPreferencesControllerPostProcessBefore', ['controller' => $this]);
         $form = $this->get('prestashop.adapter.administration.form_handler')->getForm();
         $form->handleRequest($request);
-
-        if (!in_array(
-            $this->authorizationLevel($this::CONTROLLER_NAME),
-            [
-                PageVoter::LEVEL_READ,
-                PageVoter::LEVEL_UPDATE,
-                PageVoter::LEVEL_CREATE,
-                PageVoter::LEVEL_DELETE,
-            ]
-        )) {
-            $this->addFlash('error', $this->trans('You do not have permission to edit this', 'Admin.Notifications.Error'));
-
-            return $this->redirectToRoute('admin_administration');
-        }
 
         if ($form->isSubmitted()) {
             $data = $form->getData();

@@ -3,9 +3,10 @@ const {AccessPageFO} = require('../../../selectors/FO/access_page');
 const {AddProductPage} = require('../../../selectors/BO/add_product_page');
 const commonFeature = require('../../common_scenarios/feature');
 const commonProduct = require('../../common_scenarios/product');
+const welcomeScenarios = require('../../common_scenarios/welcome');
 
 let productData = {
-  name: 'Feat',
+  name: 'Feat2',
   quantity: "10",
   price: '5',
   image_name: 'image_test.jpg',
@@ -32,6 +33,7 @@ scenario('Delete "Feature" with bulk actions', () => {
     test('should login successfully in the Back Office', () => client.signInBO(AccessPageBO));
   }, 'attribute_and_feature');
 
+  welcomeScenarios.findAndCloseWelcomeModal();
   commonFeature.createFeature(featureData);
   commonProduct.createProduct(AddProductPage, productData);
   commonFeature.featureBulkActions(featureData, 'delete');

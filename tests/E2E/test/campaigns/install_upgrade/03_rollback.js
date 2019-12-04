@@ -3,7 +3,7 @@ const {ModulePage} = require('../../selectors/BO/module_page');
 const {AddProductPage} = require('../../selectors/BO/add_product_page');
 const {AccessPageFO} = require('../../selectors/FO/access_page');
 const {ShopParameters} = require('../../selectors/BO/shopParameters/shop_parameters.js');
-
+const {Menu} = require('../../selectors/BO/menu.js');
 const commonScenarios = require('../common_scenarios/product');
 const orderCommonScenarios = require('../common_scenarios/order');
 
@@ -25,17 +25,19 @@ scenario('The shop installation', () => {
   }, 'installation');
 
   scenario('Rollback to the old version ', client => {
-    test('should click on "Module" button', () => client.waitForExistAndClick(ModulePage.module_autoUpgrade_menu));
+    test('should go to "Module" page', () => client.goToSubtabMenuPage(Menu.Improve.Modules.modules_menu, Menu.Improve.Modules.modules_manager_submenu));
+    test('should set the name of the module in the search input', () => client.waitAndSetValue(ModulePage.module_selection_input, 'autoupgrade'));
+    test('should click on "Search" button', () => client.waitForExistAndClick(ModulePage.selection_search_button));
+    test('should click on "Configure" button', () => client.waitForExistAndClick(ModulePage.configure_link.replace('%moduleTechName', 'autoupgrade')));
     test('should deactivate the shop', () => {
       return promise
         .then(() => client.waitForVisibleElement(ModulePage.confirm_maintenance_shop_icon))
         .then(() => client.waitForExistAndClick(ModulePage.maintenance_shop));
     });
-    test('should click on "Choose your backup" button', () => client.waitForExistAndClick(ModulePage.module_autoUpgrade_menu));
     test('should choose the back up version', () => client.waitForExistAndClick(ModulePage.rollback_version));
     test('should click on the "ROLLBACK" button', () => client.waitForExistAndClick(ModulePage.rollback_button));
     test('should wait until the rollback is finished', () => client.waitForExist(ModulePage.loader_tag, 310000));
-    test('should check the success message appear', () => client.checkTextValue(ModulePage.success_msg, 'Rollback complete'));
+    test('should check the success message appear', () => client.checkTextValue(ModulePage.success_msg, 'Restoration complete.'));
   }, 'installation');
 
   scenario('logout successfully from the Back Office', client => {
@@ -59,7 +61,7 @@ scenario('The shop installation', () => {
     test('should login successfully in the Front Office', () => client.signInFO(AccessPageFO, UrlLastStableVersion));
   }, 'installation');
 
-  orderCommonScenarios.createOrderFO();
+  orderCommonScenarios.createOrderFO("connected");
 
   scenario('Logout from the back office', client => {
     test('should logout successfully from the Front Office', () => client.signOutFO(AccessPageFO));

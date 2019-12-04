@@ -1,6 +1,6 @@
 <?php
 /**
- * 2007-2018 PrestaShop
+ * 2007-2018 PrestaShop.
  *
  * NOTICE OF LICENSE
  *
@@ -45,11 +45,13 @@ final class CustomerPreferencesFormHandler extends FormHandler
      */
     public function save(array $data)
     {
-        if (empty($this->dataProvider->setData($data))) {
+        $errors = parent::save($data);
+
+        if (empty($errors)) {
             $this->handleB2bUpdate($data['general']['enable_b2b_mode']);
         }
 
-        return parent::save($data);
+        return $errors;
     }
 
     /**
@@ -61,9 +63,10 @@ final class CustomerPreferencesFormHandler extends FormHandler
     }
 
     /**
-     * Based on B2b mode, we need to enable/disable some tabs
+     * Based on B2b mode, we need to enable/disable some tabs.
      *
      * @param bool $b2bMode Current B2B mode status
+     *
      * @throws \InvalidArgumentException
      */
     private function handleB2bUpdate($b2bMode)

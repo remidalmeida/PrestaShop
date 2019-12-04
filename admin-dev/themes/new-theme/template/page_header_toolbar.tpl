@@ -61,7 +61,8 @@
                 {$toolbar_btn['modules-list'].desc}
               </a>
             {/if}
-            {if isset($help_link)}
+
+            {if isset($help_link) and $help_link != false}
 
               {if $enableSidebar}
                 <a class="btn btn-outline-secondary btn-help btn-sidebar" href="#"
@@ -101,9 +102,16 @@
           {foreach $level_2.sub_tabs as $level_3}
             {if $level_3.current}
               {foreach $level_3.sub_tabs as $level_4}
-                <li class="nav-item">
-                  <a href="{$level_4.href}" id="subtab-{$level_4.class_name}" class="nav-link tab {if $level_4.current}active current{/if}" data-submenu="{$level_4.id_tab}">{$level_4.name}</a>
-                </li>
+                {if $level_4.active}
+                  <li class="nav-item">
+                    <a href="{$level_4.href}" id="subtab-{$level_4.class_name}" class="nav-link tab {if $level_4.current}active current{/if}" data-submenu="{$level_4.id_tab}">
+                      {$level_4.name}
+                      <span class="notification-container">
+                        <span class="notification-counter"></span>
+                      </span>
+                    </a>
+                  </li>
+                {/if}
               {/foreach}
             {/if}
           {/foreach}

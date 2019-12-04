@@ -1,6 +1,6 @@
 <?php
 /**
- * 2007-2018 PrestaShop
+ * 2007-2018 PrestaShop.
  *
  * NOTICE OF LICENSE
  *
@@ -27,22 +27,24 @@
 namespace PrestaShopBundle\Controller\Admin\Configure\ShopParameters;
 
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
-use PrestaShopBundle\Security\Voter\PageVoter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use PrestaShopBundle\Security\Annotation\AdminSecurity;
+use PrestaShopBundle\Security\Annotation\DemoRestricted;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Controller responsible of "Configure > Shop Parameters > Customer Settings" page
+ * Controller responsible of "Configure > Shop Parameters > Customer Settings" page.
  */
 class CustomerPreferencesController extends FrameworkBundleAdminController
 {
     /**
-     * Show customer preferences page
-     *
-     * @param Request $request
+     * Show customer preferences page.
      *
      * @Template("@PrestaShop/Admin/Configure/ShopParameters/customer_preferences.html.twig")
+     * @AdminSecurity("is_granted('read', request.get('_legacy_controller'))", message="Access denied.")
+     *
+     * @param Request $request
      *
      * @return array Template parameters
      */
@@ -62,7 +64,10 @@ class CustomerPreferencesController extends FrameworkBundleAdminController
     }
 
     /**
-     * Handle customer settings form submit
+     * Process the Customer Preferences configuration form.
+     *
+     * @AdminSecurity("is_granted(['read','update', 'create','delete'], request.get('_legacy_controller'))", message="You do not have permission to update this.", redirectRoute="admin_customer_preferences")
+     * @DemoRestricted(redirectRoute="admin_customer_preferences")
      *
      * @param Request $request
      *
@@ -70,24 +75,6 @@ class CustomerPreferencesController extends FrameworkBundleAdminController
      */
     public function processAction(Request $request)
     {
-        $legacyController = $request->attributes->get('_legacy_controller');
-
-        if (!in_array(
-            $this->authorizationLevel($legacyController),
-            [
-                PageVoter::LEVEL_UPDATE,
-                PageVoter::LEVEL_CREATE,
-                PageVoter::LEVEL_DELETE,
-            ]
-        )) {
-            $this->addFlash(
-                'error',
-                $this->trans('You do not have permission to edit this', 'Admin.Notifications.Error')
-            );
-
-            return $this->redirectToRoute('admin_customer_preferences');
-        }
-
         $formHandler = $this->get('prestashop.admin.customer_preferences.form_handler');
 
         $form = $formHandler->getForm();

@@ -7,17 +7,18 @@ let path = require('path');
 global.productIdElement = [];
 global.productsTable = [];
 global.productsSortedTable = [];
+global.productStatus = [];
 
 class Product extends CommonClient {
 
   getElementID() {
     return this.client
-      .waitForExist(ProductList.first_product_id, 90000)
-      .then(() => this.client.getText(ProductList.first_product_id))
+      .waitForExist(ProductList.product_id.replace('%ID', 1), 90000)
+      .then(() => this.client.getText(ProductList.product_id.replace('%ID', 1)))
       .then((text) => global.productIdElement[0] = text)
-      .then(() => this.client.getText(ProductList.second_product_id))
+      .then(() => this.client.getText(ProductList.product_id.replace('%ID', 2)))
       .then((text) => global.productIdElement[1] = text)
-      .then(() => this.client.getText(ProductList.third_product_id))
+      .then(() => this.client.getText(ProductList.product_id.replace('%ID', 3)))
       .then((text) => global.productIdElement[2] = text)
       .then(() => expect(Number(global.productIdElement[1])).to.be.below(Number(global.productIdElement[0])))
       .then(() => expect(Number(global.productIdElement[2])).to.be.below(Number(global.productIdElement[1])));
@@ -31,7 +32,7 @@ class Product extends CommonClient {
       .then((text) => expect(text).to.be.true);
   }
 
-  openAllCategory() {
+  openAllCategories() {
     return this.client
       .scrollTo(AddProductPage.catalog_home, 50)
       .waitForExistAndClick(AddProductPage.catalog_home)
@@ -91,13 +92,14 @@ class Product extends CommonClient {
   searchAndAddRelatedProduct() {
     let search_products = data.common.search_related_products.split('//');
     return this.client
+      .scrollTo(AddProductPage.search_add_related_product_input)
       .waitAndSetValue(AddProductPage.search_add_related_product_input, search_products[0])
       .waitForVisibleAndClick(AddProductPage.related_product_item)
       .waitAndSetValue(AddProductPage.search_add_related_product_input, search_products[1])
       .waitForVisibleAndClick(AddProductPage.related_product_item);
   }
 
-  addFeatureHeight(type) {
+  addFeature(type) {
     if (type === 'pack') {
       this.client
         .scrollTo(AddProductPage.product_add_feature_btn, 50);
@@ -106,7 +108,7 @@ class Product extends CommonClient {
       .scrollTo(AddProductPage.product_add_feature_btn, 150)
       .waitForExistAndClick(AddProductPage.product_add_feature_btn)
       .waitForExistAndClick(AddProductPage.feature_select_button)
-      .waitForExistAndClick(AddProductPage.feature_select_option_height)
+      .waitForExistAndClick(AddProductPage.feature_select_option)
       .waitAndSetValue(AddProductPage.feature_custom_value_height, data.standard.features.feature1.custom_value);
   }
 
@@ -133,11 +135,13 @@ class Product extends CommonClient {
       .selectByVisibleText(addProductPage.feature_value_select, value);
   }
 
-  clickPageNextOrPrevious(selector) {
+  clickNextOrPrevious(selector) {
     if (global.isVisible) {
       return this.client
         .click(selector)
         .pause(2000);
+    } else {
+      return this.client.pause(0)
     }
   }
 
@@ -158,14 +162,14 @@ class Product extends CommonClient {
     }
   }
 
-  getProductPageNumber(selector) {
+  getProductPageNumber(selector, pause = 0) {
     return this.client
+      .pause(pause)
       .execute(function (selector) {
-        let count = document.getElementById(selector).getElementsByTagName("tbody")[0].children.length;
-        return count;
+        return document.getElementById(selector).getElementsByTagName("tbody")[0].children.length;
       }, selector)
       .then((count) => {
-        global.productsPageNumber = count.value;
+        global.productsNumber = count.value;
       });
   }
 
@@ -220,7 +224,7 @@ class Product extends CommonClient {
         this.client
           .waitUntil(function () {
             sort_mode === 'ASC' ? this.sortByAsc(type) : this.sortByDesc(type);
-          }, 1000 * global.productsPageNumber);
+          }, 1000 * global.productsNumber);
       });
   }
 
@@ -235,8 +239,51 @@ class Product extends CommonClient {
         this.client
           .waitUntil(function () {
             expect(productsTable).to.deep.equal(productsSortedTable);
-          }, 1000 * global.productsPageNumber);
+          }, 1000 * global.productsNumber);
       });
+  }
+
+  clickPageNext(selector) {
+    return this.client
+      .scrollWaitForExistAndClick(selector);
+  }
+
+  getProductName(selector, i) {
+    return this.client
+      .getText(selector).then(function (name) {
+        global.productInfo.push({'name':name, 'status':'false'})
+      });
+  }
+
+  UrlModification(globalVar, productName) {
+    return this.client
+      .pause(1000)
+      .then(() => global.tab[globalVar] = global.URL + "/" + (global.tab[globalVar].split("/"))[(global.tab[globalVar].split("/")).length - 1].replace(".jpg", "/" + productName + ".jpg"));
+  }
+
+  getProductStatus(selector, i) {
+    return this.client
+      .getText(selector).then(function (status) {
+        global.productStatus[i] = status;
+      });
+  }
+
+  checkFeatureValue(predefinedValueSelector, customValueSelector, featureData) {
+    if(global.isVisible) {
+      if(featureData.predefined_value !== '') {
+        return this.client
+          .isSelected(predefinedValueSelector)
+          .then((value) => expect(value).to.be.equal(true));
+      } else if (featureData.customized_value !== '') {
+        return this.client
+          .getAttribute(customValueSelector, 'value')
+          .then((value) => expect(value).to.be.equal(featureData.customized_value));
+      } else {
+        return this.client
+          .pause(0)
+          .then(() => expect(featureData.predefined_value !== '' && featureData.customized_value !== '', "You must choose a pre-defined value or set the customized value").to.be.equal(true));
+      }
+    }
   }
 
 }

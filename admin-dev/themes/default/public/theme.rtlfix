@@ -6,7 +6,7 @@
        url('https://res.cloudinary.com/ipresta/raw/upload/v1522044764/vazir_v18.0.0/Vazir.ttf') format('truetype');
   font-weight: normal;
 }
-      
+
 @font-face {
   font-family: Vazir;
   src: url('https://res.cloudinary.com/ipresta/raw/upload/v1522045523/vazir_v18.0.0/Vazir-Bold.eot');
@@ -98,4 +98,32 @@ svg {
 
 .process-icon-rtl:before {
   content : "\f1dd\f0d9";
+}
+
+#header_infos #header_logo {
+  background-position: right;
+}
+
+/* fix notification dropdown */
+.notification-center .dropdown-menu {
+  right: auto;
+  left: 85px !important;
+}
+
+/* fix popover */
+.popover {
+  right: auto;
+  left: 5px;
+  margin-right: 0;
+  margin-left: 8px;
+}
+.popover .arrow {
+  left: -8px;
+  right: auto;
+  transform: scaleX(-1);
+}
+
+/* fix stock quantity arrow direction */
+.stock-app .stock-overview .table .qty-update .material-icons {
+  transform: scaleX(-1);
 }

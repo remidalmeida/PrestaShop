@@ -1,6 +1,6 @@
 <?php
 /**
- * 2007-2018 PrestaShop
+ * 2007-2018 PrestaShop.
  *
  * NOTICE OF LICENSE
  *
@@ -23,11 +23,10 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-
 use Symfony\Component\Translation\TranslatorInterface;
 
 /**
- * Class ValidateConstraintTranslatorCore
+ * Class ValidateConstraintTranslatorCore.
  */
 class ValidateConstraintTranslatorCore
 {
@@ -50,23 +49,33 @@ class ValidateConstraintTranslatorCore
      */
     public function translate($validator)
     {
-        if ($validator === 'isName') {
+        if ($validator === 'isName' || $validator === 'isCustomerName') {
             return $this->translator->trans(
-                'Invalid name', array(), 'Shop.Forms.Errors'
+                'Invalid name',
+                [],
+                'Shop.Forms.Errors'
             );
-        } elseif ($validator === 'isBirthDate') {
+        }
+
+        if ($validator === 'isBirthDate') {
             return $this->translator->trans(
-                'Format should be %s.', array(Tools::formatDateStr('31 May 1970')), 'Shop.Forms.Errors'
+                'Format should be %s.',
+                [Tools::formatDateStr('31 May 1970')],
+                'Shop.Forms.Errors'
             );
-        } elseif ($validator === 'required') {
+        }
+
+        if ($validator === 'required') {
             return $this->translator->trans(
-                'Required field', array(), 'Shop.Forms.Errors'
+                'Required field',
+                [],
+                'Shop.Forms.Errors'
             );
         }
 
         return $this->translator->trans(
             'Invalid format.',
-            array(),
+            [],
             'Shop.Forms.Errors'
         );
     }
