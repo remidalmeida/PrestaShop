@@ -8,6 +8,7 @@ npm-debug.log.*
 download/*
 /img/*
 /log/*
+!/log/index.php
 /upload/*
 vendor/*
 docs/phpdoc-sf/
