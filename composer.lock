@@ -7,7 +7,7 @@
     "content-hash": "5c7b1108f21b45f58b60aa0ca000899d",
     "packages": [
         {
-            "name": "beberlei/DoctrineExtensions",
+            "name": "beberlei/doctrineextensions",
             "version": "v1.1.9",
             "source": {
                 "type": "git",
