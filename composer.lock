@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5c7b1108f21b45f58b60aa0ca000899d",
+    "content-hash": "43bca071a64e3512551eaec3f654fcef",
     "packages": [
         {
             "name": "beberlei/doctrineextensions",
@@ -5447,12 +5447,12 @@
             "source": {
                 "type": "git",
                 "url": "git@gitlab.com:remidalmeida/prestashop-theme-sotraco.git",
-                "reference": "61c06f51f59050b86f372e7cc6c3adebf7848a58"
+                "reference": "745b7ab7abe6af9686986ae48cb4008b6c46b484"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/remidalmeida%2Fprestashop-theme-sotraco/repository/archive.zip?sha=61c06f51f59050b86f372e7cc6c3adebf7848a58",
-                "reference": "61c06f51f59050b86f372e7cc6c3adebf7848a58",
+                "url": "https://gitlab.com/api/v4/projects/remidalmeida%2Fprestashop-theme-sotraco/repository/archive.zip?sha=745b7ab7abe6af9686986ae48cb4008b6c46b484",
+                "reference": "745b7ab7abe6af9686986ae48cb4008b6c46b484",
                 "shasum": ""
             },
             "type": "prestashop-theme",
@@ -5467,7 +5467,7 @@
             ],
             "description": "PrestaShop Sotraco theme",
             "homepage": "https://gitlab.com/remidalmeida/prestashop-theme-sotraco",
-            "time": "2018-08-29T09:14:06+00:00"
+            "time": "2019-12-05T18:05:43+00:00"
         },
         {
             "name": "remidalmeida/productcomments",
@@ -6634,12 +6634,12 @@
             "source": {
                 "type": "git",
                 "url": "git@gitlab.com:remidalmeida/prestashop-module-systempay.git",
-                "reference": "d889aceba170f794d1e15b195e452f91ee420613"
+                "reference": "993fed27c9bdc1901c36e12e05a29acb78770dd2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/remidalmeida%2Fprestashop-module-systempay/repository/archive.zip?sha=d889aceba170f794d1e15b195e452f91ee420613",
-                "reference": "d889aceba170f794d1e15b195e452f91ee420613",
+                "url": "https://gitlab.com/api/v4/projects/remidalmeida%2Fprestashop-module-systempay/repository/archive.zip?sha=993fed27c9bdc1901c36e12e05a29acb78770dd2",
+                "reference": "993fed27c9bdc1901c36e12e05a29acb78770dd2",
                 "shasum": ""
             },
             "type": "prestashop-module",
@@ -6654,7 +6654,7 @@
             ],
             "description": "SystemPay",
             "homepage": "https://gitlab.com/remidalmeida/prestashop-module-systempay",
-            "time": "2018-07-30T09:36:48+00:00"
+            "time": "2019-12-05T20:23:31+00:00"
         },
         {
             "name": "tecnickcom/tcpdf",

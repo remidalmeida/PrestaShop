@@ -125,7 +125,7 @@
     },
     {
       "type": "composer",
-      "url": "https://packages.remid.ovh/"
+      "url": "https://satis.iwantu.io/"
     }
   ],
   "require-dev": {
